@@ -1,6 +1,9 @@
-import { getProducts } from "@/lib/products";
-
-export const dynamic = "force-dynamic";
+async function getProducts() {
+  const res = await fetch("http://localhost:3001/api/products", {
+    cache: "no-store"
+  });
+  return res.json();
+}
 
 export default async function Home() {
   const products = await getProducts();
@@ -8,15 +11,15 @@ export default async function Home() {
   return (
     <main>
       <h1>E-Commerce Dengan Next.js</h1>
-      <div style={{ display: "flex", gap: 20 }}>
-        {products.map((prod) => (
+      <div style={{ display: "flex", gap: "20px" }}>
+        {products.map((prod => (
           <div key={prod.id} style={{ border: "1px solid #ccc", padding: 20 }}>
-            <img src={`/images/${prod.gambar}`} width={150} alt={prod.nama} />
+            <img src={`/images/${prod.gambar}`} width={150}/>
             <h3>{prod.nama}</h3>
             <p>Rp {prod.harga}</p>
             <p>{prod.deskripsi}</p>
           </div>
-        ))}
+        )))}
       </div>
     </main>
   );
