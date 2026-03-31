@@ -1,0 +1,7 @@
+// Halaman ini dikosongkan karena routing "/" ditangani oleh pages/index.js
+// Namun karena App Router memiliki prioritas lebih tinggi, konten utama
+// ada di pages/index.js dan dirender melalui pages/_app.js
+
+export default function Page() {
+  return null;
+}

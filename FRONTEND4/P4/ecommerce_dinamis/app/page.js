@@ -1,3 +1,4 @@
+// app/page.js
 async function getProducts() {
   const res = await fetch("http://localhost:3000/api/products", {
     cache: "no-store"
@@ -14,7 +15,7 @@ export default async function Home() {
       <div style={{ display: "flex", gap: "20px" }}>
         {products.map((prod) => (
           <div key={prod.id} style={{ border: "1px solid #ccc", padding: 20 }}>
-            <img src={`/images/${prod.gambar}`} width={150}/>
+            <img src={`/images/${prod.gambar}`} width={150} />
             <h3>{prod.nama}</h3>
             <p>Rp {prod.harga}</p>
             <p>{prod.deskripsi}</p>
