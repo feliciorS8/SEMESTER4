@@ -1,8 +1,8 @@
-// app/api/products
-import { connect } from "@/lib/db";
+// app/api/products/route.js
+import { query } from "@/lib/db";
 
 export async function GET() {
-  const db = await connect();
-  const [rows] = await db.execute("SELECT * FROM products");
+  const rows = await query("SELECT * FROM products");
   return Response.json(rows);
 }
+
