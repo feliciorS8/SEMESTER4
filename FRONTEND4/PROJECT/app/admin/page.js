@@ -14,15 +14,30 @@ export default function AdminConsole() {
   const [dokters, setDokters] = useState([]);
   const [reservasis, setReservasis] = useState([]);
   
-  const token = typeof window !== 'undefined' ? localStorage.getItem("token") : null;
+  // Pagination state
+  const [poliPage, setPoliPage] = useState(1);
+  const [poliPagination, setPoliPagination] = useState({ page: 1, totalPages: 1, total: 0 });
+  const [dokterPage, setDokterPage] = useState(1);
+  const [dokterPagination, setDokterPagination] = useState({ page: 1, totalPages: 1, total: 0 });
+  const [reservasiPage, setReservasiPage] = useState(1);
+  const [reservasiPagination, setReservasiPagination] = useState({ page: 1, totalPages: 1, total: 0 });
+  const [allPolis, setAllPolis] = useState([]); // for dokter dropdown
+  
+  const [token, setToken] = useState(null);
 
   useEffect(() => {
-    if (!token) {
+    const savedToken = localStorage.getItem("token");
+    if (!savedToken) {
       router.push("/login");
       return;
     }
+    setToken(savedToken);
+  }, []);
+
+  useEffect(() => {
+    if (!token) return;
     fetchData();
-  }, [activeTab]);
+  }, [token, activeTab, poliPage, dokterPage, reservasiPage]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -39,16 +54,24 @@ export default function AdminConsole() {
         })).reverse(); // reverse so oldest is first
         setStats({ ...data, chartData });
       } else if (activeTab === "poli") {
-        const res = await fetch("http://localhost:5000/api/admin/poli", { headers: { "Authorization": `Bearer ${token}` } });
-        setPolis(await res.json());
+        const res = await fetch(`http://localhost:5000/api/admin/poli?page=${poliPage}&limit=5`, { headers: { "Authorization": `Bearer ${token}` } });
+        const result = await res.json();
+        setPolis(result.data);
+        setPoliPagination(result.pagination);
       } else if (activeTab === "dokter") {
-        const res = await fetch("http://localhost:5000/api/admin/dokter", { headers: { "Authorization": `Bearer ${token}` } });
-        setDokters(await res.json());
-        const resPoli = await fetch("http://localhost:5000/api/admin/poli", { headers: { "Authorization": `Bearer ${token}` } });
-        setPolis(await resPoli.json());
+        const res = await fetch(`http://localhost:5000/api/admin/dokter?page=${dokterPage}&limit=5`, { headers: { "Authorization": `Bearer ${token}` } });
+        const result = await res.json();
+        setDokters(result.data);
+        setDokterPagination(result.pagination);
+        // Fetch ALL polis for the dropdown (no pagination)
+        const resPoli = await fetch(`http://localhost:5000/api/admin/poli?page=1&limit=100`, { headers: { "Authorization": `Bearer ${token}` } });
+        const poliResult = await resPoli.json();
+        setAllPolis(poliResult.data);
       } else if (activeTab === "reservasi") {
-        const res = await fetch("http://localhost:5000/api/admin/reservasi", { headers: { "Authorization": `Bearer ${token}` } });
-        setReservasis(await res.json());
+        const res = await fetch(`http://localhost:5000/api/admin/reservasi?page=${reservasiPage}&limit=5`, { headers: { "Authorization": `Bearer ${token}` } });
+        const result = await res.json();
+        setReservasis(result.data);
+        setReservasiPagination(result.pagination);
       }
     } catch (err) {
       if(err.message === "Unauthorized") {
@@ -123,6 +146,45 @@ export default function AdminConsole() {
     setActiveTab(tab);
     setIsMobileMenuOpen(false);
   }
+
+  // Reusable Pagination Component
+  const PaginationControls = ({ pagination, currentPage, setPage }) => {
+    if (!pagination || pagination.totalPages <= 1) return null;
+    const pages = [];
+    for (let i = 1; i <= pagination.totalPages; i++) pages.push(i);
+    return (
+      <div className="flex items-center justify-between px-4 py-4 border-t bg-gray-50 rounded-b-xl">
+        <p className="text-sm text-gray-500">
+          Menampilkan <span className="font-semibold">{((currentPage - 1) * pagination.limit) + 1}</span>–<span className="font-semibold">{Math.min(currentPage * pagination.limit, pagination.total)}</span> dari <span className="font-semibold">{pagination.total}</span> data
+        </p>
+        <div className="flex gap-1">
+          <button
+            onClick={() => setPage(Math.max(1, currentPage - 1))}
+            disabled={currentPage === 1}
+            className="px-3 py-1.5 text-sm rounded-lg border bg-white hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          >
+            ← Prev
+          </button>
+          {pages.map(p => (
+            <button
+              key={p}
+              onClick={() => setPage(p)}
+              className={`px-3 py-1.5 text-sm rounded-lg border transition-colors ${p === currentPage ? 'bg-cyan-600 text-white border-cyan-600 shadow' : 'bg-white hover:bg-gray-100'}`}
+            >
+              {p}
+            </button>
+          ))}
+          <button
+            onClick={() => setPage(Math.min(pagination.totalPages, currentPage + 1))}
+            disabled={currentPage === pagination.totalPages}
+            className="px-3 py-1.5 text-sm rounded-lg border bg-white hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          >
+            Next →
+          </button>
+        </div>
+      </div>
+    );
+  };
 
   if (loading && activeTab === "dashboard" && stats.total_dokter === 0) return <div className="text-center py-20 text-cyan-700 font-semibold">Memuat Data Admin...</div>;
 
@@ -279,6 +341,7 @@ export default function AdminConsole() {
                   ))}
                 </tbody>
               </table>
+              <PaginationControls pagination={poliPagination} currentPage={poliPage} setPage={setPoliPage} />
             </div>
           </div>
         )}
@@ -301,7 +364,7 @@ export default function AdminConsole() {
                   <label className="text-xs font-semibold text-gray-600">Pilih Poli</label>
                   <select value={dokterForm.poli_id} onChange={e=>setDokterForm({...dokterForm, poli_id: e.target.value})} className="w-full border rounded p-2 text-sm bg-white" required>
                     <option value="">-- Pilih --</option>
-                    {polis.map(p => <option key={p.id} value={p.id}>{p.nama_poli}</option>)}
+                    {allPolis.map(p => <option key={p.id} value={p.id}>{p.nama_poli}</option>)}
                   </select>
                 </div>
                 <div className="space-y-1">
@@ -368,6 +431,7 @@ export default function AdminConsole() {
                   ))}
                 </tbody>
               </table>
+              <PaginationControls pagination={dokterPagination} currentPage={dokterPage} setPage={setDokterPage} />
             </div>
           </div>
         )}
@@ -417,6 +481,7 @@ export default function AdminConsole() {
                   )}
                 </tbody>
               </table>
+              <PaginationControls pagination={reservasiPagination} currentPage={reservasiPage} setPage={setReservasiPage} />
             </div>
           </div>
         )}

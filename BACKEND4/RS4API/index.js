@@ -205,8 +205,17 @@ app.get('/api/admin/dashboard', verifyToken, async (req, res) => {
 // Admin Poli GET/POST/PUT/DELETE
 app.get('/api/admin/poli', verifyToken, async (req, res) => {
     try {
-        const [polis] = await pool.query("SELECT * FROM poli ORDER BY id DESC");
-        res.json(polis);
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 5;
+        const offset = (page - 1) * limit;
+        
+        const [[{total}]] = await pool.query("SELECT COUNT(*) as total FROM poli");
+        const [polis] = await pool.query("SELECT * FROM poli ORDER BY id DESC LIMIT ? OFFSET ?", [limit, offset]);
+        
+        res.json({
+            data: polis,
+            pagination: { page, limit, total, totalPages: Math.ceil(total / limit) }
+        });
     } catch(err) {
         res.status(500).json({ error: err.message });
     }
@@ -250,13 +259,22 @@ app.delete('/api/admin/poli/:id', verifyToken, async (req, res) => {
 // Admin Dokter
 app.get('/api/admin/dokter', verifyToken, async (req, res) => {
     try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 5;
+        const offset = (page - 1) * limit;
+        
+        const [[{total}]] = await pool.query("SELECT COUNT(*) as total FROM dokter");
         const [dokters] = await pool.query(`
             SELECT d.*, p.nama_poli 
             FROM dokter d 
             LEFT JOIN poli p ON d.poli_id = p.id 
             ORDER BY d.id DESC
-        `);
-        res.json(dokters);
+            LIMIT ? OFFSET ?
+        `, [limit, offset]);
+        res.json({
+            data: dokters,
+            pagination: { page, limit, total, totalPages: Math.ceil(total / limit) }
+        });
     } catch(err) {
         res.status(500).json({ error: err.message });
     }
@@ -307,6 +325,11 @@ app.delete('/api/admin/dokter/:id', verifyToken, async (req, res) => {
 app.get('/api/admin/reservasi', verifyToken, async (req, res) => {
     try {
         const status = req.query.status || 'all';
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 5;
+        const offset = (page - 1) * limit;
+        
+        let countQuery = "SELECT COUNT(*) as total FROM reservasi";
         let query = `
             SELECT r.*, d.nama_dokter, p.nama_poli
             FROM reservasi r
@@ -314,14 +337,22 @@ app.get('/api/admin/reservasi', verifyToken, async (req, res) => {
             LEFT JOIN poli   p ON r.poli_id   = p.id
         `;
         let params = [];
+        let countParams = [];
         if (status !== 'all') {
+            countQuery += " WHERE status = ?";
             query += " WHERE r.status = ?";
             params.push(status);
+            countParams.push(status);
         }
-        query += " ORDER BY r.created_at DESC";
+        query += " ORDER BY r.created_at DESC LIMIT ? OFFSET ?";
+        params.push(limit, offset);
         
+        const [[{total}]] = await pool.query(countQuery, countParams);
         const [reservasis] = await pool.query(query, params);
-        res.json(reservasis);
+        res.json({
+            data: reservasis,
+            pagination: { page, limit, total, totalPages: Math.ceil(total / limit) }
+        });
     } catch(err) {
         res.status(500).json({ error: err.message });
     }
