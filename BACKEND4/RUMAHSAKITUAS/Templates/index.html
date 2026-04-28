@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RS Yasmin - Rumah Sakit Terpercaya</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+  </head>
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar">
+      <div class="container">
+        <a href="/" class="navbar-brand">RS Yasmin</a>
+        <ul class="navbar-nav">
+          <li><a href="#home">Beranda</a></li>
+          <li><a href="#services">Layanan</a></li>
+          <li><a href="#doctors">Dokter</a></li>
+          <li><a href="#schedule">Jadwal</a></li>
+          <li><a href="#contact">Kontak</a></li>
+          {% if session.logged_in %}
+          <li>
+            <a href="{{ url_for('logout') }}" class="btn-logout">Logout</a>
+          </li>
+          {% else %}
+          <li><a href="{{ url_for('login') }}" class="btn-login">Login</a></li>
+          {% endif %}
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+      <div class="container">
+        <div class="hero-content">
+          <h1>Selamat Datang di RS Yasmin</h1>
+          <p>Pelayanan Kesehatan Terpercaya untuk Keluarga Anda</p>
+          <a href="{{ url_for('reservasi') }}" class="btn-primary"
+            style="animation: gentle-pulse 2.5s ease-in-out infinite;"
+            >Reservasi Sekarang</a
+          >
+          <!-- Stats bar -->
+          <div class="hero-stats">
+            <div class="hero-stat">
+              <div class="hero-stat-number">{{ total_dokter }}</div>
+              <div class="hero-stat-label">Dokter Spesialis</div>
+            </div>
+            <div class="hero-stat">
+              <div class="hero-stat-number">{{ total_poli }}</div>
+              <div class="hero-stat-label">Poli Tersedia</div>
+            </div>
+            <div class="hero-stat">
+              <div class="hero-stat-number">24/7</div>
+              <div class="hero-stat-label">Jam Layanan</div>
+            </div>
+            <div class="hero-stat">
+              <div class="hero-stat-number">{{ total_reservasi }}+</div>
+              <div class="hero-stat-label">Pasien Ditangani</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- Services Section -->
+    <section id="services" class="section" style="background: #f8f9fa">
+      <div class="container">
+        <div style="display: flex; flex-direction: column; gap: 1rem">
+          <h2 class="section-title" style="margin: 0">Layanan Poli Kami</h2>
+          <input
+            id="searchInput"
+            type="text"
+            placeholder="Cari poli, dokter, atau jadwal..."
+            class="form-control"
+            style="max-width: 360px"
+            oninput="filterContent()"
+          />
+          <small style="color: #666"
+            >Ketik nama poli (contoh: Anak), dokter (contoh: Dr. Haechan), atau
+            hari/jam.</small
+          >
+        </div>
+        <div class="card-grid">
+          {% for poli in polis %}
+          <div
+            class="card poli-card"
+            data-search="{{ (poli.nama_poli ~ ' ' ~ poli.deskripsi)|lower }}"
+          >
+            <div class="card-icon"></div>
+            <h3>{{ poli.nama_poli }}</h3>
+            <p>{{ poli.deskripsi }}</p>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+
+    <!-- Doctors Section -->
+    <section id="doctors" class="section">
+      <div class="container">
+        <h2 class="section-title">Tim Dokter Kami</h2>
+        <div class="card-grid">
+          {% for dokter in dokters %}
+          <div
+            class="card doctor-card"
+            data-search="{{ (dokter.nama_dokter ~ ' ' ~ dokter.spesialisasi ~ ' ' ~ dokter.nama_poli ~ ' ' ~ dokter.jadwal_hari ~ ' ' ~ dokter.jadwal_jam)|lower }}"
+          >
+            <div class="doctor-img">
+              {% if dokter.foto and dokter.foto != 'default-doctor.jpg' %}
+              <img
+                src="{{ url_for('static', filename='images/doctors/' + dokter.foto) }}"
+                alt="{{ dokter.nama_dokter }}"
+              />
+              {% else %}
+              <div
+                style="
+                  width: 100%;
+                  height: 100%;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  background: #f0f9ff;
+                  color: #0891b2;
+                  font-weight: 700;
+                "
+              >
+                {{ dokter.nama_dokter[0] if dokter.nama_dokter }}
+              </div>
+              {% endif %}
+            </div>
+            <div class="doctor-name">{{ dokter.nama_dokter }}</div>
+            <div class="doctor-specialty">{{ dokter.spesialisasi }}</div>
+            <div class="doctor-poli">{{ dokter.nama_poli }}</div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+
+    <!-- Schedule Section -->
+    <section id="schedule" class="section" style="background: #f8f9fa">
+      <div class="container">
+        <h2 class="section-title">Jadwal Praktik Dokter</h2>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Dokter</th>
+                <th>Spesialisasi</th>
+                <th>Hari</th>
+                <th>Jam Praktik</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for dokter in dokters %}
+              <tr
+                class="schedule-row"
+                data-search="{{ (dokter.nama_dokter ~ ' ' ~ dokter.spesialisasi ~ ' ' ~ dokter.jadwal_hari ~ ' ' ~ dokter.jadwal_jam)|lower }}"
+              >
+                <td>{{ dokter.nama_dokter }}</td>
+                <td>{{ dokter.spesialisasi }}</td>
+                <td>{{ dokter.jadwal_hari }}</td>
+                <td>{{ dokter.jadwal_jam }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="section">
+      <div class="container">
+        <h2 class="section-title">Hubungi Kami</h2>
+        <div class="contact-grid">
+          <div class="contact-item">
+            <div class="contact-icon"></div>
+            <h3>Telepon</h3>
+            <p>(021) 1234-5678</p>
+          </div>
+          <div class="contact-item">
+            <div class="contact-icon"></div>
+            <h3>Email</h3>
+            <p>info@rsyasmin.com</p>
+          </div>
+          <div class="contact-item">
+            <div class="contact-icon"></div>
+            <h3>Alamat</h3>
+            <p>Jl. Kesehatan No. 123, Jakarta</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="container">
+        <p>&copy; 2025 RS Yasmin. All Rights Reserved.</p>
+      </div>
+    </footer>
+
+    <script>
+      function filterContent() {
+        const q = (document.getElementById("searchInput").value || "")
+          .toLowerCase()
+          .trim();
+        // Poli cards
+        document.querySelectorAll(".poli-card").forEach((card) => {
+          const text = card.dataset.search || "";
+          card.style.display = text.includes(q) ? "block" : "none";
+        });
+        // Doctor cards
+        document.querySelectorAll(".doctor-card").forEach((card) => {
+          const text = card.dataset.search || "";
+          card.style.display = text.includes(q) ? "block" : "none";
+        });
+        // Schedule rows
+        document.querySelectorAll(".schedule-row").forEach((row) => {
+          const text = row.dataset.search || "";
+          row.style.display = text.includes(q) ? "" : "none";
+        });
+      }
+
+      // Active nav link based on scroll position
+      const sections = document.querySelectorAll("section[id]");
+      const navLinks = document.querySelectorAll(".navbar-nav a[href^='#']");
+
+      function setActiveNav() {
+        let currentSection = "";
+        sections.forEach((section) => {
+          const sectionTop = section.offsetTop - 80;
+          if (window.scrollY >= sectionTop) {
+            currentSection = section.getAttribute("id");
+          }
+        });
+        navLinks.forEach((link) => {
+          link.classList.remove("active");
+          if (link.getAttribute("href") === "#" + currentSection) {
+            link.classList.add("active");
+          }
+        });
+      }
+
+      window.addEventListener("scroll", setActiveNav);
+      setActiveNav(); // run on load
+
+      // Navbar shrink on scroll
+      const navbar = document.querySelector(".navbar");
+      function handleNavbarShrink() {
+        if (window.scrollY > 50) {
+          navbar.classList.add("shrunk");
+        } else {
+          navbar.classList.remove("shrunk");
+        }
+      }
+      window.addEventListener("scroll", handleNavbarShrink);
+      handleNavbarShrink(); // run on load
+    </script>
+  </body>
+</html>

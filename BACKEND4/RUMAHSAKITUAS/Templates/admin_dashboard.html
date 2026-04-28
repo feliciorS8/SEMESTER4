@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard - RS Yasmin</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+    <style>
+      /* ── Admin Dashboard Specific ── */
+      body { background: #f0f9ff; }
+
+      .admin-topbar {
+        background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+        padding: 0;
+        box-shadow: 0 4px 20px rgba(6,182,212,0.25);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+
+      .admin-topbar-inner {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        height: 68px;
+      }
+
+      .admin-brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .admin-brand-icon {
+        width: 40px;
+        height: 40px;
+        background: rgba(255,255,255,0.2);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+      }
+
+      .admin-brand-text h1 {
+        font-size: 1.1rem;
+        color: white;
+        font-weight: 700;
+        margin: 0;
+        line-height: 1.2;
+      }
+
+      .admin-brand-text span {
+        font-size: 0.78rem;
+        color: rgba(255,255,255,0.75);
+      }
+
+      .admin-topbar-right {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .admin-user-badge {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(255,255,255,0.15);
+        border: 1px solid rgba(255,255,255,0.25);
+        border-radius: 10px;
+        padding: 6px 14px;
+        color: white;
+        font-size: 0.88rem;
+        font-weight: 500;
+      }
+
+      .admin-user-dot {
+        width: 8px;
+        height: 8px;
+        background: #4ade80;
+        border-radius: 50%;
+        box-shadow: 0 0 0 2px rgba(74,222,128,0.3);
+        animation: pulse-green 2s ease-in-out infinite;
+      }
+
+      @keyframes pulse-green {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(74,222,128,0.4); }
+        50%       { box-shadow: 0 0 0 5px rgba(74,222,128,0); }
+      }
+
+      .btn-logout-admin {
+        background: rgba(255,255,255,0.15);
+        color: white;
+        border: 1px solid rgba(255,255,255,0.3);
+        padding: 7px 18px;
+        border-radius: 8px;
+        font-size: 0.88rem;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.25s;
+      }
+
+      .btn-logout-admin:hover {
+        background: rgba(255,255,255,0.28);
+        color: white;
+        transform: translateY(-1px);
+      }
+
+      /* ── Page Body ── */
+      .admin-body {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem 24px 4rem;
+      }
+
+      .admin-page-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 0.25rem;
+      }
+
+      .admin-page-sub {
+        color: #64748b;
+        font-size: 0.9rem;
+        margin-bottom: 2rem;
+      }
+
+      /* ── Stat Cards ── */
+      .admin-stat-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1.25rem;
+        margin-bottom: 2.5rem;
+      }
+
+      .admin-stat-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        transition: transform 0.25s, box-shadow 0.25s;
+        border-left: 4px solid transparent;
+      }
+
+      .admin-stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+      }
+
+      .admin-stat-card.cyan  { border-left-color: #06b6d4; }
+      .admin-stat-card.teal  { border-left-color: #0d9488; }
+      .admin-stat-card.amber { border-left-color: #f59e0b; }
+
+      .stat-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        flex-shrink: 0;
+      }
+
+      .stat-icon.cyan  { background: #e0f2fe; }
+      .stat-icon.teal  { background: #ccfbf1; }
+      .stat-icon.amber { background: #fef3c7; }
+
+      .stat-content .stat-val {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #0f172a;
+        line-height: 1;
+        margin-bottom: 4px;
+      }
+
+      .stat-content .stat-lbl {
+        font-size: 0.82rem;
+        color: #64748b;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      /* ── Menu Cards ── */
+      .section-label {
+        font-size: 0.78rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #94a3b8;
+        margin-bottom: 1rem;
+      }
+
+      .admin-menu-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2.5rem;
+      }
+
+      .admin-menu-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem 1.25rem;
+        text-decoration: none;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+        transition: all 0.25s;
+        border: 2px solid transparent;
+      }
+
+      .admin-menu-card:hover {
+        border-color: #06b6d4;
+        transform: translateY(-3px);
+        box-shadow: 0 8px 24px rgba(6,182,212,0.15);
+      }
+
+      .menu-card-icon {
+        width: 44px;
+        height: 44px;
+        background: #e0f2fe;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+      }
+
+      .menu-card-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #0f172a;
+      }
+
+      .menu-card-desc {
+        font-size: 0.8rem;
+        color: #64748b;
+        line-height: 1.4;
+      }
+
+      /* ── Guide Card ── */
+      .guide-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.75rem;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      }
+
+      .guide-card h3 {
+        color: #0891b2;
+        font-size: 1rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .guide-list {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .guide-list li {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        font-size: 0.875rem;
+        color: #475569;
+        line-height: 1.5;
+      }
+
+      .guide-bullet {
+        width: 20px;
+        height: 20px;
+        background: #e0f2fe;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        margin-top: 2px;
+        font-size: 0.65rem;
+        color: #0891b2;
+        font-weight: 700;
+      }
+
+      .admin-footer {
+        text-align: center;
+        color: #94a3b8;
+        font-size: 0.82rem;
+        margin-top: 3rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #e2e8f0;
+      }
+    </style>
+  </head>
+  <body>
+
+    <!-- ── Top Bar ── -->
+    <div class="admin-topbar">
+      <div class="admin-topbar-inner">
+        <div class="admin-brand">
+          <div class="admin-brand-icon">🏥</div>
+          <div class="admin-brand-text">
+            <h1>RS Yasmin</h1>
+            <span>Admin Panel</span>
+          </div>
+        </div>
+        <div class="admin-topbar-right">
+          <div class="admin-user-badge">
+            <div class="admin-user-dot"></div>
+            {{ session.username }}
+          </div>
+          <a href="{{ url_for('logout') }}" class="btn-logout-admin">Logout</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Page Body ── -->
+    <div class="admin-body">
+
+      <!-- Flash Messages -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }}" style="margin-bottom:1rem;">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <div class="admin-page-title">Dashboard Overview</div>
+      <div class="admin-page-sub">Selamat datang kembali, <strong>{{ session.username }}</strong> 👋</div>
+
+      <!-- ── Stats ── -->
+      <div class="admin-stat-grid">
+        <div class="admin-stat-card cyan">
+          <div class="stat-icon cyan">👨‍⚕️</div>
+          <div class="stat-content">
+            <div class="stat-val">{{ total_dokter }}</div>
+            <div class="stat-lbl">Total Dokter</div>
+          </div>
+        </div>
+        <div class="admin-stat-card teal">
+          <div class="stat-icon teal">🏥</div>
+          <div class="stat-content">
+            <div class="stat-val">{{ total_poli }}</div>
+            <div class="stat-lbl">Total Poli</div>
+          </div>
+        </div>
+        <div class="admin-stat-card amber">
+          <div class="stat-icon amber">📋</div>
+          <div class="stat-content">
+            <div class="stat-val">{{ total_reservasi }}</div>
+            <div class="stat-lbl">Reservasi Pending</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Quick Menu ── -->
+      <div class="section-label">Menu Kelola</div>
+      <div class="admin-menu-grid">
+        <a href="{{ url_for('admin_dokter') }}" class="admin-menu-card">
+          <div class="menu-card-icon">👨‍⚕️</div>
+          <div>
+            <div class="menu-card-title">Kelola Dokter</div>
+            <div class="menu-card-desc">Tambah, edit & hapus data dokter beserta foto dan jadwal</div>
+          </div>
+        </a>
+        <a href="{{ url_for('admin_poli') }}" class="admin-menu-card">
+          <div class="menu-card-icon">🏥</div>
+          <div>
+            <div class="menu-card-title">Kelola Poli</div>
+            <div class="menu-card-desc">Tambah dan kelola layanan poli rumah sakit</div>
+          </div>
+        </a>
+        <a href="{{ url_for('admin_reservasi') }}" class="admin-menu-card">
+          <div class="menu-card-icon">📋</div>
+          <div>
+            <div class="menu-card-title">Kelola Reservasi</div>
+            <div class="menu-card-desc">Lihat, konfirmasi & kelola semua reservasi pasien</div>
+          </div>
+        </a>
+        <a href="{{ url_for('index') }}" class="admin-menu-card">
+          <div class="menu-card-icon">🏠</div>
+          <div>
+            <div class="menu-card-title">Lihat Homepage</div>
+            <div class="menu-card-desc">Preview tampilan website RS Yasmin yang dilihat pasien</div>
+          </div>
+        </a>
+      </div>
+
+      <!-- ── Guide ── -->
+      <div class="section-label">Panduan Admin</div>
+      <div class="guide-card">
+        <h3>📋 Informasi Penggunaan</h3>
+        <ul class="guide-list">
+          <li>
+            <div class="guide-bullet">1</div>
+            <span><strong>Kelola Dokter:</strong> Tambah, edit, dan hapus data dokter beserta upload foto profil</span>
+          </li>
+          <li>
+            <div class="guide-bullet">2</div>
+            <span><strong>Kelola Poli:</strong> Tambah dan hapus poli/layanan — perubahan langsung tampil di homepage</span>
+          </li>
+          <li>
+            <div class="guide-bullet">3</div>
+            <span><strong>Format Foto:</strong> Upload foto dokter dalam format JPG, PNG, atau GIF (maks. 2MB)</span>
+          </li>
+          <li>
+            <div class="guide-bullet">4</div>
+            <span><strong>Nomor WhatsApp:</strong> Gunakan format internasional tanpa tanda plus (contoh: 6281234567890)</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="admin-footer">
+        &copy; 2025 RS Yasmin Admin Area. All Rights Reserved.
+      </div>
+
+    </div>
+  </body>
+</html>

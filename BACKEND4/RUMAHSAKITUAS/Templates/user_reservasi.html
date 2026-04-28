@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reservasi - RS Yasmin</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+  </head>
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar">
+      <div class="container">
+        <a href="/" class="navbar-brand">🏥 RS Yasmin</a>
+        <ul class="navbar-nav">
+          <li><a href="{{ url_for('index') }}">← Kembali ke Home</a></li>
+          {% if session.logged_in %}
+          <li>
+            <a href="{{ url_for('logout') }}" class="btn-logout">Logout</a>
+          </li>
+          {% endif %}
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Reservasi Form -->
+    <div class="reservasi-container">
+      <h2 class="section-title">Formulir Reservasi</h2>
+
+      <div class="reservasi-form">
+        <form method="POST" action="{{ url_for('submit_reservasi') }}">
+          <div class="form-group">
+            <label for="nama_pasien">Nama Lengkap *</label>
+            <input
+              type="text"
+              id="nama_pasien"
+              name="nama_pasien"
+              class="form-control"
+              placeholder="Masukkan nama lengkap"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="no_wa">Nomor WhatsApp *</label>
+            <input
+              type="tel"
+              id="no_wa"
+              name="no_wa"
+              class="form-control"
+              placeholder="Contoh: 081234567890"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="poli_id">Pilih Poli *</label>
+            <select
+              id="poli_id"
+              name="poli_id"
+              class="form-control"
+              required
+              onchange="loadDokter()"
+            >
+              <option value="">-- Pilih Poli --</option>
+              {% for poli in polis %}
+              <option value="{{ poli.id }}">{{ poli.nama_poli }}</option>
+              {% endfor %}
+            </select>
+            <input type="hidden" id="poli_name" name="poli_name" />
+          </div>
+
+          <div class="form-group">
+            <label for="dokter_id">Pilih Dokter *</label>
+            <select
+              id="dokter_id"
+              name="dokter_id"
+              class="form-control"
+              required
+            >
+              <option value="">-- Pilih Poli Terlebih Dahulu --</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="tanggal">Tanggal Reservasi *</label>
+            <input
+              type="date"
+              id="tanggal"
+              name="tanggal"
+              class="form-control"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="keluhan">Keluhan</label>
+            <textarea
+              id="keluhan"
+              name="keluhan"
+              class="form-control"
+              placeholder="Jelaskan keluhan Anda (opsional)"
+            ></textarea>
+          </div>
+
+          <button type="submit" class="btn-submit">
+            📱 Lanjutkan ke WhatsApp
+          </button>
+        </form>
+      </div>
+
+      <div
+        style="
+          margin-top: 2rem;
+          padding: 1.5rem;
+          background: #e0f2fe;
+          border-radius: 10px;
+        "
+      >
+        <h3 style="color: #0891b2; margin-bottom: 1rem">ℹ️ Informasi</h3>
+        <ul style="color: #666; line-height: 1.8">
+          <li>
+            Setelah submit, Anda akan diarahkan ke WhatsApp untuk konfirmasi
+            reservasi
+          </li>
+          <li>Pastikan nomor WhatsApp yang dimasukkan aktif</li>
+          <li>Reservasi akan diproses oleh tim RS Yasmin</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="container">
+        <p>&copy; 2030 RS Yasmin. All Rights Reserved.</p>
+      </div>
+    </footer>
+
+    <script>
+      // Set minimum date to today
+      document.getElementById("tanggal").min = new Date()
+        .toISOString()
+        .split("T")[0];
+
+      // Load dokter based on poli
+      function loadDokter() {
+        const poliSelect = document.getElementById("poli_id");
+        const dokterSelect = document.getElementById("dokter_id");
+        const poliId = poliSelect.value;
+        const poliName = poliSelect.options[poliSelect.selectedIndex].text;
+
+        document.getElementById("poli_name").value = poliName;
+
+        if (!poliId) {
+          dokterSelect.innerHTML =
+            '<option value="">-- Pilih Poli Terlebih Dahulu --</option>';
+          return;
+        }
+
+        fetch(`/get_dokter_by_poli/${poliId}`)
+          .then((response) => response.json())
+          .then((data) => {
+            dokterSelect.innerHTML =
+              '<option value="">-- Pilih Dokter --</option>';
+            data.forEach((dokter) => {
+              const option = document.createElement("option");
+              option.value = dokter.id;
+              option.textContent = `${dokter.nama_dokter} - ${dokter.spesialisasi}`;
+              dokterSelect.appendChild(option);
+            });
+          });
+      }
+    </script>
+  </body>
+</html>

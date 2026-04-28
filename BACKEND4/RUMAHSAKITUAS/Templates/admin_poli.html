@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kelola Poli - Admin RS Yasmin</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+    <style>
+      body { background: #f0f9ff; }
+
+      .admin-topbar {
+        background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+        box-shadow: 0 4px 20px rgba(6,182,212,0.25);
+        position: sticky; top: 0; z-index: 100;
+      }
+      .admin-topbar-inner {
+        max-width: 1200px; margin: 0 auto; padding: 0 24px;
+        display: flex; justify-content: space-between; align-items: center; height: 68px;
+      }
+      .admin-brand { display: flex; align-items: center; gap: 12px; }
+      .admin-brand-icon {
+        width: 40px; height: 40px; background: rgba(255,255,255,0.2);
+        border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;
+      }
+      .admin-brand-text h1 { font-size: 1.1rem; color: white; font-weight: 700; margin: 0; line-height: 1.2; }
+      .admin-brand-text span { font-size: 0.78rem; color: rgba(255,255,255,0.75); }
+      .topbar-right { display: flex; align-items: center; gap: 0.75rem; }
+      .topbar-back {
+        color: rgba(255,255,255,0.85); text-decoration: none; font-size: 0.88rem;
+        font-weight: 500; padding: 6px 12px; border-radius: 8px; transition: background 0.2s;
+      }
+      .topbar-back:hover { background: rgba(255,255,255,0.15); color: white; }
+      .btn-logout-admin {
+        background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3);
+        padding: 7px 18px; border-radius: 8px; font-size: 0.88rem; font-weight: 600;
+        cursor: pointer; text-decoration: none; transition: all 0.25s;
+      }
+      .btn-logout-admin:hover { background: rgba(255,255,255,0.28); }
+
+      .admin-body { max-width: 1200px; margin: 0 auto; padding: 2rem 24px 4rem; }
+      .page-title { font-size: 1.4rem; font-weight: 700; color: #0f172a; margin-bottom: 0.2rem; }
+      .page-sub { color: #64748b; font-size: 0.88rem; margin-bottom: 2rem; }
+      .section-label {
+        font-size: 0.78rem; font-weight: 700; text-transform: uppercase;
+        letter-spacing: 1px; color: #94a3b8; margin-bottom: 1rem;
+      }
+
+      .form-card {
+        background: white; border-radius: 16px; padding: 1.75rem;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06); margin-bottom: 2rem;
+      }
+      .form-card h2 { font-size: 1.05rem; color: #0891b2; margin-bottom: 1.25rem; }
+
+      /* Poli cards grid */
+      .poli-grid {
+        display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.25rem;
+        margin-bottom: 2rem;
+      }
+      .poli-card {
+        background: white; border-radius: 16px; padding: 1.5rem;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        border-top: 4px solid #06b6d4;
+        position: relative; transition: transform 0.2s, box-shadow 0.2s;
+      }
+      .poli-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
+      .poli-icon {
+        width: 44px; height: 44px; background: #e0f2fe; border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.3rem; margin-bottom: 0.75rem;
+      }
+      .poli-name { font-size: 1rem; font-weight: 700; color: #0891b2; margin-bottom: 0.3rem; }
+      .poli-desc { font-size: 0.85rem; color: #64748b; margin-bottom: 1rem; line-height: 1.4; }
+      .poli-date { font-size: 0.75rem; color: #94a3b8; margin-top: 0.5rem; }
+      .poli-divider { border: none; border-top: 1px solid #f1f5f9; margin: 1rem 0; }
+      .poli-edit-label { font-size: 0.78rem; font-weight: 600; color: #0891b2; margin-bottom: 0.35rem; display: block; }
+
+      .btn-save-poli {
+        width: 100%; background: #06b6d4; color: white; border: none;
+        padding: 0.6rem; border-radius: 8px; font-weight: 600; cursor: pointer;
+        font-size: 0.85rem; transition: background 0.2s; margin-top: 0.5rem;
+      }
+      .btn-save-poli:hover { background: #0891b2; }
+
+      .btn-del-poli {
+        position: absolute; top: 1rem; right: 1rem;
+        background: #fee2e2; color: #dc2626; border: none;
+        width: 32px; height: 32px; border-radius: 8px; cursor: pointer;
+        font-size: 0.9rem; display: flex; align-items: center; justify-content: center;
+        text-decoration: none; transition: background 0.2s;
+      }
+      .btn-del-poli:hover { background: #fecaca; }
+
+      .warning-card {
+        background: #fffbeb; border: 1px solid #fcd34d; border-radius: 12px;
+        padding: 1.25rem 1.5rem;
+      }
+      .warning-card h3 { color: #92400e; font-size: 0.95rem; margin-bottom: 0.5rem; }
+      .warning-card p { color: #92400e; font-size: 0.85rem; line-height: 1.6; }
+
+      .empty-poli { text-align: center; padding: 3rem; color: #94a3b8; }
+      .admin-footer { text-align: center; color: #94a3b8; font-size: 0.82rem; margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid #e2e8f0; }
+    </style>
+  </head>
+  <body>
+
+    <!-- Topbar -->
+    <div class="admin-topbar">
+      <div class="admin-topbar-inner">
+        <div class="admin-brand">
+          <div class="admin-brand-icon">🏥</div>
+          <div class="admin-brand-text">
+            <h1>Kelola Poli</h1>
+            <span>RS Yasmin Admin Panel</span>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <a href="{{ url_for('admin_dashboard') }}" class="topbar-back">← Dashboard</a>
+          <a href="{{ url_for('logout') }}" class="btn-logout-admin">Logout</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-body">
+
+      <!-- Flash -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}{% for category, message in messages %}
+        <div class="alert alert-{{ category }}" style="margin-bottom:1rem;">{{ message }}</div>
+        {% endfor %}{% endif %}
+      {% endwith %}
+
+      <!-- Form Tambah -->
+      <div class="form-card">
+        <h2>➕ Tambah Poli Baru</h2>
+        <form method="POST" action="{{ url_for('admin_add_poli') }}">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="nama_poli">Nama Poli *</label>
+              <input type="text" id="nama_poli" name="nama_poli" class="form-control" placeholder="Poli Umum" required />
+            </div>
+            <div class="form-group">
+              <label for="deskripsi">Deskripsi Poli *</label>
+              <input type="text" id="deskripsi" name="deskripsi" class="form-control" placeholder="Pelayanan kesehatan umum" required />
+            </div>
+          </div>
+          <button type="submit" class="btn-add">➕ Tambah Poli</button>
+        </form>
+      </div>
+
+      <!-- Daftar Poli -->
+      <div class="section-label">Daftar Poli ({{ polis|length }})</div>
+      {% if polis %}
+      <div class="poli-grid">
+        {% for poli in polis %}
+        <div class="poli-card">
+          <a href="{{ url_for('admin_delete_poli', id=poli.id) }}"
+             class="btn-del-poli"
+             onclick="return confirm('Yakin hapus Poli {{ poli.nama_poli }}?')">🗑️</a>
+          <div class="poli-icon">🏥</div>
+          <div class="poli-name">{{ poli.nama_poli }}</div>
+          <div class="poli-desc">{{ poli.deskripsi }}</div>
+          <hr class="poli-divider" />
+          <form method="POST" action="{{ url_for('admin_update_poli', id=poli.id) }}">
+            <label class="poli-edit-label">Edit Nama</label>
+            <input type="text" name="nama_poli" class="form-control" value="{{ poli.nama_poli }}" required style="margin-bottom:0.5rem;" />
+            <label class="poli-edit-label">Edit Deskripsi</label>
+            <input type="text" name="deskripsi" class="form-control" value="{{ poli.deskripsi }}" required style="margin-bottom:0;" />
+            <button type="submit" class="btn-save-poli">💾 Simpan Perubahan</button>
+          </form>
+          <div class="poli-date">📅 {{ poli.created_at.strftime('%d %b %Y') }}</div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-poli">
+        <div style="font-size:2.5rem; margin-bottom:0.75rem;">🏥</div>
+        Belum ada data poli
+      </div>
+      {% endif %}
+
+      <!-- Warning -->
+      <div class="warning-card">
+        <h3>⚠️ Peringatan</h3>
+        <p>Menghapus poli akan menyebabkan data dokter yang terkait kehilangan referensi poli. Pastikan tidak ada dokter yang menggunakan poli ini sebelum menghapusnya.</p>
+      </div>
+
+      <div class="admin-footer">&copy; 2025 RS Yasmin Admin Panel. All Rights Reserved.</div>
+    </div>
+  </body>
+</html>

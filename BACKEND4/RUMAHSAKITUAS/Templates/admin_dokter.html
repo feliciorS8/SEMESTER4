@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kelola Dokter - Admin RS Yasmin</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+    <style>
+      body { background: #f0f9ff; }
+
+      /* ── Topbar (sama dengan dashboard) ── */
+      .admin-topbar {
+        background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+        box-shadow: 0 4px 20px rgba(6,182,212,0.25);
+        position: sticky; top: 0; z-index: 100;
+      }
+      .admin-topbar-inner {
+        max-width: 1200px; margin: 0 auto; padding: 0 24px;
+        display: flex; justify-content: space-between; align-items: center; height: 68px;
+      }
+      .admin-brand { display: flex; align-items: center; gap: 12px; }
+      .admin-brand-icon {
+        width: 40px; height: 40px; background: rgba(255,255,255,0.2);
+        border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;
+      }
+      .admin-brand-text h1 { font-size: 1.1rem; color: white; font-weight: 700; margin: 0; line-height: 1.2; }
+      .admin-brand-text span { font-size: 0.78rem; color: rgba(255,255,255,0.75); }
+      .topbar-right { display: flex; align-items: center; gap: 0.75rem; }
+      .topbar-back {
+        color: rgba(255,255,255,0.85); text-decoration: none; font-size: 0.88rem;
+        font-weight: 500; padding: 6px 12px; border-radius: 8px;
+        transition: background 0.2s;
+      }
+      .topbar-back:hover { background: rgba(255,255,255,0.15); color: white; }
+      .btn-logout-admin {
+        background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3);
+        padding: 7px 18px; border-radius: 8px; font-size: 0.88rem; font-weight: 600;
+        cursor: pointer; text-decoration: none; transition: all 0.25s;
+      }
+      .btn-logout-admin:hover { background: rgba(255,255,255,0.28); }
+
+      /* ── Body ── */
+      .admin-body { max-width: 1200px; margin: 0 auto; padding: 2rem 24px 4rem; }
+      .page-title { font-size: 1.4rem; font-weight: 700; color: #0f172a; margin-bottom: 0.2rem; }
+      .page-sub { color: #64748b; font-size: 0.88rem; margin-bottom: 2rem; }
+
+      /* ── Add Form Card ── */
+      .form-card {
+        background: white; border-radius: 16px; padding: 1.75rem;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06); margin-bottom: 2rem;
+      }
+      .form-card h2 { font-size: 1.05rem; color: #0891b2; margin-bottom: 1.25rem; }
+
+      /* ── Table ── */
+      .section-label {
+        font-size: 0.78rem; font-weight: 700; text-transform: uppercase;
+        letter-spacing: 1px; color: #94a3b8; margin-bottom: 1rem;
+      }
+      .table-card {
+        background: white; border-radius: 16px; overflow: hidden;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      }
+      table { width: 100%; border-collapse: collapse; }
+      thead { background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%); }
+      thead th { padding: 1rem 1.2rem; color: white; font-weight: 600; font-size: 0.85rem; text-align: left; }
+      tbody tr { border-bottom: 1px solid #f1f5f9; transition: background 0.2s; }
+      tbody tr:last-child { border-bottom: none; }
+      tbody tr:hover { background: #f8fdff; }
+      tbody td { padding: 0.9rem 1.2rem; font-size: 0.9rem; color: #334155; vertical-align: middle; }
+      .empty-state {
+        text-align: center; padding: 3rem; color: #94a3b8;
+      }
+      .empty-state div { font-size: 2.5rem; margin-bottom: 0.75rem; }
+
+      /* ── Action Buttons ── */
+      .action-group { display: flex; flex-direction: column; gap: 0.4rem; }
+      .btn-edit-sm {
+        background: #0891b2; color: white; border: none;
+        padding: 0.35rem 0.75rem; border-radius: 6px; cursor: pointer;
+        font-size: 0.78rem; font-weight: 600; white-space: nowrap;
+        transition: background 0.2s; text-align: center;
+      }
+      .btn-edit-sm:hover { background: #0e7490; }
+      .btn-foto-sm {
+        background: #0d9488; color: white; border: none;
+        padding: 0.35rem 0.75rem; border-radius: 6px; cursor: pointer;
+        font-size: 0.78rem; font-weight: 600; white-space: nowrap;
+        transition: background 0.2s; text-align: center;
+      }
+      .btn-foto-sm:hover { background: #0f766e; }
+      .btn-del-sm {
+        background: #ef4444; color: white; border: none;
+        padding: 0.35rem 0.75rem; border-radius: 6px; cursor: pointer;
+        font-size: 0.78rem; font-weight: 600; white-space: nowrap;
+        text-decoration: none; display: block; text-align: center;
+        transition: background 0.2s;
+      }
+      .btn-del-sm:hover { background: #dc2626; }
+
+      /* ── Modal ── */
+      .modal-overlay {
+        display: none; position: fixed; inset: 0;
+        background: rgba(0,0,0,0.45); z-index: 9999;
+        align-items: center; justify-content: center;
+      }
+      .modal-box {
+        background: white; border-radius: 16px; padding: 2rem;
+        width: 100%; max-width: 500px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.2); position: relative;
+        max-height: 90vh; overflow-y: auto;
+      }
+      .modal-close {
+        position: absolute; top: 1rem; right: 1rem;
+        background: #f1f5f9; border: none; border-radius: 50%;
+        width: 32px; height: 32px; cursor: pointer; font-size: 1rem;
+        display: flex; align-items: center; justify-content: center;
+      }
+      .modal-title { font-size: 1.1rem; font-weight: 700; color: #0891b2; margin-bottom: 0.25rem; }
+      .modal-sub { font-size: 0.85rem; color: #64748b; margin-bottom: 1.5rem; }
+      .modal-actions { display: flex; gap: 0.75rem; margin-top: 1.25rem; }
+      .btn-save {
+        flex: 1; background: #06b6d4; color: white; border: none;
+        padding: 0.75rem; border-radius: 8px; font-weight: 700;
+        cursor: pointer; font-size: 0.95rem; transition: background 0.2s;
+      }
+      .btn-save:hover { background: #0891b2; }
+      .btn-cancel {
+        padding: 0.75rem 1.25rem; background: #f1f5f9; color: #475569;
+        border: none; border-radius: 8px; font-weight: 600; cursor: pointer;
+      }
+
+      .preview-wrapper { display: none; text-align: center; margin-bottom: 1rem; }
+      .preview-img {
+        width: 100px; height: 100px; border-radius: 50%;
+        object-fit: cover; border: 3px solid #06b6d4; margin-bottom: 0.5rem;
+      }
+      .doc-avatar {
+        width: 46px; height: 46px; border-radius: 50%;
+        object-fit: cover; border: 2px solid #e0f2fe;
+      }
+      .doc-avatar-placeholder {
+        width: 46px; height: 46px; border-radius: 50%;
+        background: #e0f2fe; border: 2px solid #bae6fd;
+        display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
+      }
+
+      .admin-footer { text-align: center; color: #94a3b8; font-size: 0.82rem; margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid #e2e8f0; }
+    </style>
+  </head>
+  <body>
+
+    <!-- Topbar -->
+    <div class="admin-topbar">
+      <div class="admin-topbar-inner">
+        <div class="admin-brand">
+          <div class="admin-brand-icon">👨‍⚕️</div>
+          <div class="admin-brand-text">
+            <h1>Kelola Dokter</h1>
+            <span>RS Yasmin Admin Panel</span>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <a href="{{ url_for('admin_dashboard') }}" class="topbar-back">← Dashboard</a>
+          <a href="{{ url_for('logout') }}" class="btn-logout-admin">Logout</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-body">
+
+      <!-- Flash -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}{% for category, message in messages %}
+        <div class="alert alert-{{ category }}" style="margin-bottom:1rem;">{{ message }}</div>
+        {% endfor %}{% endif %}
+      {% endwith %}
+
+      <!-- Form Tambah -->
+      <div class="form-card">
+        <h2>➕ Tambah Dokter Baru</h2>
+        <form method="POST" action="{{ url_for('admin_add_dokter') }}" enctype="multipart/form-data">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="nama_dokter">Nama Dokter *</label>
+              <input type="text" id="nama_dokter" name="nama_dokter" class="form-control" placeholder="Dr. Nama Lengkap, Sp.X" required />
+            </div>
+            <div class="form-group">
+              <label for="spesialisasi">Spesialisasi *</label>
+              <input type="text" id="spesialisasi" name="spesialisasi" class="form-control" placeholder="Spesialis Anak" required />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="poli_id">Poli *</label>
+              <select id="poli_id" name="poli_id" class="form-control" required>
+                <option value="">-- Pilih Poli --</option>
+                {% for poli in polis %}
+                <option value="{{ poli.id }}">{{ poli.nama_poli }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="foto">Foto Dokter</label>
+              <input type="file" id="foto" name="foto" class="form-control" accept="image/*" />
+              <small style="color:#666;">Format: JPG, PNG, GIF (Maks 2MB)</small>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="jadwal_hari">Jadwal Hari *</label>
+              <input type="text" id="jadwal_hari" name="jadwal_hari" class="form-control" placeholder="Senin - Jumat" required />
+            </div>
+            <div class="form-group">
+              <label for="jadwal_jam">Jadwal Jam *</label>
+              <input type="text" id="jadwal_jam" name="jadwal_jam" class="form-control" placeholder="08:00 - 14:00" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="no_wa">Nomor WhatsApp *</label>
+            <input type="tel" id="no_wa" name="no_wa" class="form-control" placeholder="6281234567890" required />
+            <small style="color:#666;">Format internasional tanpa tanda + (contoh: 6281234567890)</small>
+          </div>
+          <button type="submit" class="btn-add">➕ Tambah Dokter</button>
+        </form>
+      </div>
+
+      <!-- Daftar Dokter -->
+      <div class="section-label">Daftar Dokter ({{ dokters|length }})</div>
+      <div class="table-card">
+        <table>
+          <thead>
+            <tr>
+              <th>Foto</th>
+              <th>Nama & Spesialisasi</th>
+              <th>Poli</th>
+              <th>Jadwal</th>
+              <th>WhatsApp</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for dokter in dokters %}
+            <tr>
+              <td>
+                {% if dokter.foto and dokter.foto != 'default-doctor.jpg' %}
+                <img src="{{ url_for('static', filename='images/doctors/' + dokter.foto) }}" alt="{{ dokter.nama_dokter }}" class="doc-avatar" />
+                {% else %}
+                <div class="doc-avatar-placeholder">👨‍⚕️</div>
+                {% endif %}
+              </td>
+              <td>
+                <div style="font-weight:600; color:#0f172a;">{{ dokter.nama_dokter }}</div>
+                <div style="font-size:0.8rem; color:#64748b;">{{ dokter.spesialisasi }}</div>
+              </td>
+              <td>{{ dokter.nama_poli or '-' }}</td>
+              <td>
+                <div style="font-size:0.85rem;">{{ dokter.jadwal_hari }}</div>
+                <div style="font-size:0.78rem; color:#64748b;">⏰ {{ dokter.jadwal_jam }}</div>
+              </td>
+              <td style="font-size:0.85rem;">{{ dokter.no_wa }}</td>
+              <td>
+                <div class="action-group">
+                  <button class="btn-edit-sm"
+                    onclick="openEditModal(
+                      {{ dokter.id }},
+                      '{{ dokter.nama_dokter|replace("'", "\\'") }}',
+                      '{{ dokter.spesialisasi|replace("'", "\\'") }}',
+                      {{ dokter.poli_id or 'null' }},
+                      '{{ dokter.jadwal_hari|replace("'", "\\'") }}',
+                      '{{ dokter.jadwal_jam|replace("'", "\\'") }}',
+                      '{{ dokter.no_wa }}'
+                    )">✏️ Edit</button>
+                  <button class="btn-foto-sm"
+                    onclick="openFotoModal({{ dokter.id }}, '{{ dokter.nama_dokter|replace("'", "\\'") }}')">📷 Foto</button>
+                  <a href="{{ url_for('admin_delete_dokter', id=dokter.id) }}"
+                    class="btn-del-sm"
+                    onclick="return confirm('Yakin hapus {{ dokter.nama_dokter }}?')">🗑️ Hapus</a>
+                </div>
+              </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="6" class="empty-state"><div>👨‍⚕️</div>Belum ada data dokter</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="admin-footer">&copy; 2025 RS Yasmin Admin Panel. All Rights Reserved.</div>
+    </div>
+
+    <!-- Modal: Edit Dokter -->
+    <div class="modal-overlay" id="editModal">
+      <div class="modal-box">
+        <button class="modal-close" onclick="closeEditModal()">✕</button>
+        <div class="modal-title">✏️ Edit Data Dokter</div>
+        <p class="modal-sub" id="editDokterName"></p>
+        <form id="editForm" method="POST">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Nama Dokter *</label>
+              <input type="text" name="nama_dokter" id="e_nama" class="form-control" required />
+            </div>
+            <div class="form-group">
+              <label>Spesialisasi *</label>
+              <input type="text" name="spesialisasi" id="e_spesialis" class="form-control" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Poli *</label>
+            <select name="poli_id" id="e_poli" class="form-control" required>
+              {% for poli in polis %}
+              <option value="{{ poli.id }}">{{ poli.nama_poli }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Jadwal Hari *</label>
+              <input type="text" name="jadwal_hari" id="e_hari" class="form-control" required />
+            </div>
+            <div class="form-group">
+              <label>Jadwal Jam *</label>
+              <input type="text" name="jadwal_jam" id="e_jam" class="form-control" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Nomor WhatsApp *</label>
+            <input type="tel" name="no_wa" id="e_wa" class="form-control" required />
+          </div>
+          <div class="modal-actions">
+            <button type="submit" class="btn-save">✅ Simpan Perubahan</button>
+            <button type="button" class="btn-cancel" onclick="closeEditModal()">Batal</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal: Ganti Foto -->
+    <div class="modal-overlay" id="fotoModal">
+      <div class="modal-box" style="max-width:420px;">
+        <button class="modal-close" onclick="closeFotoModal()">✕</button>
+        <div class="modal-title">📷 Ganti Foto Dokter</div>
+        <p class="modal-sub" id="fotoModalName"></p>
+        <div class="preview-wrapper" id="previewWrapper">
+          <img id="previewImg" src="" alt="Preview" class="preview-img" /><br/>
+          <small style="color:#64748b;">Preview foto</small>
+        </div>
+        <form id="fotoForm" method="POST" enctype="multipart/form-data">
+          <div class="form-group">
+            <label style="font-weight:600; color:#333; display:block; margin-bottom:0.5rem;">Pilih Foto Baru *</label>
+            <input type="file" name="foto" id="fotoInput" class="form-control" accept="image/*" required onchange="previewFoto(event)" />
+            <small style="color:#666;">Format: JPG, PNG, GIF — Maks. 2MB</small>
+          </div>
+          <div class="modal-actions">
+            <button type="submit" class="btn-save">✅ Simpan Foto</button>
+            <button type="button" class="btn-cancel" onclick="closeFotoModal()">Batal</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      // ── Edit Modal ──
+      function openEditModal(id, nama, spesialis, poliId, hari, jam, wa) {
+        document.getElementById('editModal').style.display = 'flex';
+        document.getElementById('editDokterName').textContent = nama;
+        document.getElementById('editForm').action = '/admin/dokter/edit/' + id;
+        document.getElementById('e_nama').value = nama;
+        document.getElementById('e_spesialis').value = spesialis;
+        document.getElementById('e_hari').value = hari;
+        document.getElementById('e_jam').value = jam;
+        document.getElementById('e_wa').value = wa;
+        if (poliId) document.getElementById('e_poli').value = poliId;
+      }
+      function closeEditModal() { document.getElementById('editModal').style.display = 'none'; }
+      document.getElementById('editModal').addEventListener('click', e => { if(e.target===e.currentTarget) closeEditModal(); });
+
+      // ── Foto Modal ──
+      function openFotoModal(id, nama) {
+        document.getElementById('fotoModal').style.display = 'flex';
+        document.getElementById('fotoModalName').textContent = nama;
+        document.getElementById('fotoForm').action = '/admin/dokter/update-foto/' + id;
+        document.getElementById('fotoInput').value = '';
+        document.getElementById('previewWrapper').style.display = 'none';
+        document.getElementById('previewImg').src = '';
+      }
+      function closeFotoModal() { document.getElementById('fotoModal').style.display = 'none'; }
+      document.getElementById('fotoModal').addEventListener('click', e => { if(e.target===e.currentTarget) closeFotoModal(); });
+
+      function previewFoto(event) {
+        const file = event.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = e => {
+            document.getElementById('previewImg').src = e.target.result;
+            document.getElementById('previewWrapper').style.display = 'block';
+          };
+          reader.readAsDataURL(file);
+        }
+      }
+    </script>
+  </body>
+</html>
