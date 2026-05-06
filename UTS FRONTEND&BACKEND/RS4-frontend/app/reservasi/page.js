@@ -19,7 +19,7 @@ export default function Reservasi() {
   });
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/home")
+    fetch("/api/home")
       .then(res => res.json())
       .then(data => {
         setPolis(data.polis);
@@ -33,7 +33,7 @@ export default function Reservasi() {
 
   useEffect(() => {
     if (formData.poli_id) {
-      fetch(`http://localhost:5000/api/dokter/${formData.poli_id}`)
+      fetch(`/api/dokter/${formData.poli_id}`)
         .then(res => res.json())
         .then(data => {
           setDokters(data);
@@ -51,7 +51,7 @@ export default function Reservasi() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch("http://localhost:5000/api/reservasi", {
+      const res = await fetch("/api/reservasi", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData)

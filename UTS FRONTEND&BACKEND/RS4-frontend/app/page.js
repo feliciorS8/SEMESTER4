@@ -1,11 +1,21 @@
 import Link from "next/link";
-import Image from "next/image";
+
+export const dynamic = 'force-dynamic'; // Selalu fresh data dari DB
+
+// Helper untuk mendapatkan base URL
+function getBaseUrl() {
+  // Di server-side, kita perlu URL absolut
+  if (process.env.NEXT_PUBLIC_BASE_URL) return process.env.NEXT_PUBLIC_BASE_URL;
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  return `http://localhost:3000`;
+}
 
 export default async function Home() {
   let data = { stats: { total_dokter: 0, total_poli: 0, total_reservasi: 0 }, polis: [], dokters: [] };
   
   try {
-    const res = await fetch("http://localhost:5000/api/home", { cache: "no-store" });
+    const baseUrl = getBaseUrl();
+    const res = await fetch(`${baseUrl}/api/home`, { cache: "no-store" });
     if (res.ok) {
       data = await res.json();
     }
@@ -95,7 +105,7 @@ export default async function Home() {
             <div key={dokter.id} className="bg-white rounded-2xl shadow-sm border hover:shadow-lg transition-all overflow-hidden flex flex-col group">
               <div className="relative h-64 bg-gray-200 overflow-hidden">
                 <img 
-                  src={`http://localhost:5000/static/images/doctors/${dokter.foto || "default-doctor.jpg"}`} 
+                  src={`/api/images/doctors/${dokter.foto || "default-doctor.jpg"}`} 
                   alt={dokter.nama_dokter}
                   className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
                 />

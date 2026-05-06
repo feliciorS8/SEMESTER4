@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 
@@ -32,14 +32,9 @@ export default function AdminConsole() {
       return;
     }
     setToken(savedToken);
-  }, []);
+  }, [router]);
 
-  useEffect(() => {
-    if (!token) return;
-    fetchData();
-  }, [token, activeTab, poliPage, dokterPage, reservasiPage]);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     try {
       if (activeTab === "dashboard") {
@@ -80,7 +75,12 @@ export default function AdminConsole() {
       }
     }
     setLoading(false);
-  };
+  }, [token, activeTab, poliPage, dokterPage, reservasiPage, router]);
+
+  useEffect(() => {
+    if (!token) return;
+    fetchData();
+  }, [token, activeTab, poliPage, dokterPage, reservasiPage, fetchData]);
 
   const logout = () => {
     localStorage.removeItem("token");
@@ -412,7 +412,7 @@ export default function AdminConsole() {
                   {dokters.map((d) => (
                     <tr key={d.id} className="hover:bg-gray-50">
                       <td className="px-4 py-3 flex items-center gap-3">
-                         <img src={`http://localhost:5000/static/images/doctors/${d.foto||'default-doctor.jpg'}`} className="w-10 h-10 rounded-full object-cover" alt="" />
+                         <img src={`/api/images/doctors/${d.foto||'default-doctor.jpg'}`} className="w-10 h-10 rounded-full object-cover" alt="" />
                          <div>
                             <p className="font-bold text-gray-800">{d.nama_dokter}</p>
                             <p className="text-xs text-gray-500">{d.spesialisasi} • WA: {d.no_wa}</p>
