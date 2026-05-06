@@ -113,7 +113,7 @@ export default function ProductListScreen({ navigation, products, onRefresh }) {
               style={[styles.selectBtn, selectMode && styles.selectBtnActive]}
               onPress={selectMode ? cancelSelect : () => setSelectMode(true)}
             >
-              <Ionicons name={selectMode ? 'close' : 'checkmark-done-outline'} size={18} color={selectMode ? '#FF6B6B' : '#6C63FF'} />
+              <Ionicons name={selectMode ? 'close' : 'checkmark-done-outline'} size={18} color={selectMode ? '#FF6B6B' : '#1E88E5'} />
               <Text style={[styles.selectBtnText, selectMode && { color: '#FF6B6B' }]}>
                 {selectMode ? 'Batal' : 'Pilih'}
               </Text>
@@ -126,7 +126,7 @@ export default function ProductListScreen({ navigation, products, onRefresh }) {
       {selectMode && (
         <View style={styles.selectBar}>
           <TouchableOpacity style={styles.selectBarBtn} onPress={selectAll}>
-            <Ionicons name={selectedIds.size === filteredProducts.length ? 'checkbox' : 'square-outline'} size={20} color="#6C63FF" />
+            <Ionicons name={selectedIds.size === filteredProducts.length ? 'checkbox' : 'square-outline'} size={20} color="#1E88E5" />
             <Text style={styles.selectBarText}>
               {selectedIds.size === filteredProducts.length ? 'Batal Semua' : 'Pilih Semua'}
             </Text>
@@ -205,12 +205,12 @@ const styles = StyleSheet.create({
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   headerTitle: { fontSize: 24, fontWeight: '800', color: '#1a1a2e' },
   headerSub: { fontSize: 13, color: '#8E8E93', marginTop: 4, fontWeight: '500' },
-  selectBtn: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingVertical: 8, borderRadius: 12, backgroundColor: 'rgba(108,99,255,0.08)', gap: 6 },
+  selectBtn: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingVertical: 8, borderRadius: 12, backgroundColor: 'rgba(30,136,229,0.08)', gap: 6 },
   selectBtnActive: { backgroundColor: 'rgba(255,107,107,0.08)' },
-  selectBtnText: { fontSize: 13, fontWeight: '600', color: '#6C63FF' },
+  selectBtnText: { fontSize: 13, fontWeight: '600', color: '#1E88E5' },
   selectBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#FFF', marginHorizontal: 20, marginTop: 12, borderRadius: 14, paddingHorizontal: 14, paddingVertical: 10, elevation: 3 },
   selectBarBtn: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  selectBarText: { fontSize: 13, fontWeight: '600', color: '#6C63FF' },
+  selectBarText: { fontSize: 13, fontWeight: '600', color: '#1E88E5' },
   selectCount: { fontSize: 13, fontWeight: '700', color: '#1a1a2e' },
   deleteSelBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FF6B6B', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 10, gap: 6 },
   deleteSelText: { fontSize: 13, fontWeight: '700', color: '#FFF' },
@@ -218,20 +218,20 @@ const styles = StyleSheet.create({
   searchInput: { flex: 1, marginLeft: 10, fontSize: 14, color: '#1a1a2e' },
   categoryRow: { marginTop: 14, paddingLeft: 20 },
   categoryChip: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, backgroundColor: '#FFF', marginRight: 8, elevation: 1 },
-  categoryChipActive: { backgroundColor: '#6C63FF' },
+  categoryChipActive: { backgroundColor: '#1E88E5' },
   categoryChipText: { fontSize: 12, fontWeight: '600', color: '#636366' },
   categoryChipTextActive: { color: '#FFF' },
   card: { backgroundColor: '#FFF', borderRadius: 16, marginTop: 12, flexDirection: 'row', padding: 14, elevation: 2 },
-  cardSelected: { borderWidth: 2, borderColor: '#6C63FF', backgroundColor: 'rgba(108,99,255,0.04)' },
+  cardSelected: { borderWidth: 2, borderColor: '#1E88E5', backgroundColor: 'rgba(30,136,229,0.04)' },
   checkbox: { width: 24, height: 24, borderRadius: 7, borderWidth: 2, borderColor: '#D1D1D6', justifyContent: 'center', alignItems: 'center', marginRight: 10, alignSelf: 'center' },
-  checkboxChecked: { backgroundColor: '#6C63FF', borderColor: '#6C63FF' },
+  checkboxChecked: { backgroundColor: '#1E88E5', borderColor: '#1E88E5' },
   cardImage: { width: 60, height: 60, borderRadius: 16, backgroundColor: '#F2F2F7', marginRight: 14 },
   cardEmoji: { width: 60, height: 60, borderRadius: 16, backgroundColor: '#F8F9FE', justifyContent: 'center', alignItems: 'center', marginRight: 14 },
   cardBody: { flex: 1, justifyContent: 'center' },
   cardName: { fontSize: 15, fontWeight: '700', color: '#1a1a2e' },
   cardCategory: { fontSize: 11, color: '#8E8E93', marginTop: 2, fontWeight: '500' },
   cardFooter: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 8 },
-  cardPrice: { fontSize: 15, fontWeight: '800', color: '#6C63FF' },
+  cardPrice: { fontSize: 15, fontWeight: '800', color: '#1E88E5' },
   stockBadge: { backgroundColor: 'rgba(76,175,80,0.1)', paddingHorizontal: 10, paddingVertical: 3, borderRadius: 8 },
   stockLow: { backgroundColor: 'rgba(255,107,107,0.1)' },
   stockText: { fontSize: 11, fontWeight: '600', color: '#4CAF50' },
@@ -239,5 +239,5 @@ const styles = StyleSheet.create({
   emptyBox: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingBottom: 60 },
   emptyText: { fontSize: 16, fontWeight: '600', color: '#8E8E93', marginTop: 16 },
   emptySubtext: { fontSize: 13, color: '#C7C7CC', marginTop: 4 },
-  fab: { position: 'absolute', bottom: 20, right: 20, width: 58, height: 58, borderRadius: 20, backgroundColor: '#6C63FF', justifyContent: 'center', alignItems: 'center', elevation: 8, shadowColor: '#6C63FF', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.35, shadowRadius: 8 },
+  fab: { position: 'absolute', bottom: 20, right: 20, width: 58, height: 58, borderRadius: 20, backgroundColor: '#1E88E5', justifyContent: 'center', alignItems: 'center', elevation: 8, shadowColor: '#1E88E5', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.35, shadowRadius: 8 },
 });

@@ -118,11 +118,11 @@ export default function AddProductScreen({ navigation, route, products, setProdu
             )}
             <View style={styles.imageButtons}>
               <TouchableOpacity style={styles.imgBtn} onPress={pickImage} activeOpacity={0.7}>
-                <Ionicons name="images-outline" size={20} color="#6C63FF" />
+                <Ionicons name="images-outline" size={20} color="#1E88E5" />
                 <Text style={styles.imgBtnText}>Galeri</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.imgBtn} onPress={takePhoto} activeOpacity={0.7}>
-                <Ionicons name="camera-outline" size={20} color="#6C63FF" />
+                <Ionicons name="camera-outline" size={20} color="#1E88E5" />
                 <Text style={styles.imgBtnText}>Kamera</Text>
               </TouchableOpacity>
               {image && (
@@ -198,17 +198,17 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row' },
   categoryGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   catBtn: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 12, backgroundColor: '#FFF', elevation: 1 },
-  catBtnActive: { backgroundColor: '#6C63FF' },
+  catBtnActive: { backgroundColor: '#1E88E5' },
   catBtnText: { fontSize: 13, fontWeight: '600', color: '#636366' },
   catBtnTextActive: { color: '#FFF' },
   imageSection: { backgroundColor: '#FFF', borderRadius: 16, padding: 16, elevation: 2, alignItems: 'center' },
   imagePreview: { width: 140, height: 140, borderRadius: 16, backgroundColor: '#F2F2F7' },
-  imageEditBadge: { position: 'absolute', bottom: 4, right: 4, backgroundColor: '#6C63FF', width: 28, height: 28, borderRadius: 14, justifyContent: 'center', alignItems: 'center', borderWidth: 2, borderColor: '#FFF' },
+  imageEditBadge: { position: 'absolute', bottom: 4, right: 4, backgroundColor: '#1E88E5', width: 28, height: 28, borderRadius: 14, justifyContent: 'center', alignItems: 'center', borderWidth: 2, borderColor: '#FFF' },
   imagePlaceholder: { width: 140, height: 140, borderRadius: 16, backgroundColor: '#F8F9FE', borderWidth: 2, borderColor: '#E5E5EA', borderStyle: 'dashed', justifyContent: 'center', alignItems: 'center' },
   imagePlaceholderText: { fontSize: 12, color: '#C7C7CC', marginTop: 6, fontWeight: '500' },
   imageButtons: { flexDirection: 'row', marginTop: 14, gap: 10 },
-  imgBtn: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingVertical: 8, borderRadius: 10, borderWidth: 1.5, borderColor: '#6C63FF', gap: 6 },
-  imgBtnText: { fontSize: 12, fontWeight: '600', color: '#6C63FF' },
-  saveBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#6C63FF', borderRadius: 16, height: 54, marginTop: 10, elevation: 4, shadowColor: '#6C63FF', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8 },
+  imgBtn: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingVertical: 8, borderRadius: 10, borderWidth: 1.5, borderColor: '#1E88E5', gap: 6 },
+  imgBtnText: { fontSize: 12, fontWeight: '600', color: '#1E88E5' },
+  saveBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#1E88E5', borderRadius: 16, height: 54, marginTop: 10, elevation: 4, shadowColor: '#1E88E5', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8 },
   saveBtnText: { fontSize: 16, fontWeight: '700', color: '#FFF', marginLeft: 8 },
 });

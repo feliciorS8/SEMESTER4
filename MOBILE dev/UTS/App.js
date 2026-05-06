@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -20,6 +20,10 @@ import EditProfileScreen from './screens/EditProfileScreen';
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
+// Warna utama aplikasi
+const PRIMARY = '#1E88E5';
+const PRIMARY_DARK = '#1565C0';
+
 // ===================== BOTTOM TAB NAVIGATOR =====================
 function MainTabs({ products, transactions, profile, onRefresh }) {
   return (
@@ -38,13 +42,13 @@ function MainTabs({ products, transactions, profile, onRefresh }) {
           }
           return <Ionicons name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: '#6C63FF',
+        tabBarActiveTintColor: PRIMARY,
         tabBarInactiveTintColor: '#8E8E93',
         tabBarStyle: {
           backgroundColor: '#FFFFFF',
           borderTopWidth: 0,
           elevation: 20,
-          shadowColor: '#6C63FF',
+          shadowColor: PRIMARY,
           shadowOffset: { width: 0, height: -4 },
           shadowOpacity: 0.1,
           shadowRadius: 12,
@@ -102,31 +106,41 @@ function MainTabs({ products, transactions, profile, onRefresh }) {
   );
 }
 
+const DEFAULT_PROFILE = {
+  storeName: 'Toko UMKM UTS dija',
+  ownerName: 'khadija',
+  phone: '08123456789',
+  address: 'Jl. Contoh No. 1, Kota',
+  category: 'Fashion',
+};
+
 // ===================== MAIN APP =====================
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [products, setProducts] = useState([]);
   const [transactions, setTransactions] = useState([]);
-  const [profile, setProfile] = useState({
-    storeName: 'Toko UMKM UTS dija',
-    ownerName: 'khadija',
-    phone: '08123456789',
-    address: 'Jl. Contoh No. 1, Kota',
-    category: 'Fashion',
-  });
+  const [profile, setProfile] = useState(DEFAULT_PROFILE);
 
-  // Load data from AsyncStorage
+  // Flag agar tidak save sebelum data selesai di-load
+  const isDataLoaded = useRef(false);
+
+  // Load data dari AsyncStorage saat app pertama dibuka
   const loadData = useCallback(async () => {
     try {
-      const storedProducts = await AsyncStorage.getItem('products');
-      const storedTransactions = await AsyncStorage.getItem('transactions');
-      const storedProfile = await AsyncStorage.getItem('profile');
+      const [storedProducts, storedTransactions, storedProfile] = await Promise.all([
+        AsyncStorage.getItem('umkm_products'),
+        AsyncStorage.getItem('umkm_transactions'),
+        AsyncStorage.getItem('umkm_profile'),
+      ]);
 
       if (storedProducts) setProducts(JSON.parse(storedProducts));
       if (storedTransactions) setTransactions(JSON.parse(storedTransactions));
       if (storedProfile) setProfile(JSON.parse(storedProfile));
     } catch (error) {
       console.log('Error loading data:', error);
+    } finally {
+      // Tandai data sudah di-load, baru boleh save
+      isDataLoaded.current = true;
     }
   }, []);
 
@@ -134,21 +148,27 @@ export default function App() {
     loadData();
   }, [loadData]);
 
-  // Save data to AsyncStorage whenever it changes
+  // Save data HANYA setelah data selesai di-load (mencegah overwrite data lama)
   useEffect(() => {
-    AsyncStorage.setItem('products', JSON.stringify(products));
+    if (isDataLoaded.current) {
+      AsyncStorage.setItem('umkm_products', JSON.stringify(products));
+    }
   }, [products]);
 
   useEffect(() => {
-    AsyncStorage.setItem('transactions', JSON.stringify(transactions));
+    if (isDataLoaded.current) {
+      AsyncStorage.setItem('umkm_transactions', JSON.stringify(transactions));
+    }
   }, [transactions]);
 
   useEffect(() => {
-    AsyncStorage.setItem('profile', JSON.stringify(profile));
+    if (isDataLoaded.current) {
+      AsyncStorage.setItem('umkm_profile', JSON.stringify(profile));
+    }
   }, [profile]);
 
-  const handleRefresh = useCallback(() => {
-    loadData();
+  const handleRefresh = useCallback(async () => {
+    await loadData();
   }, [loadData]);
 
   if (isLoading) {
@@ -159,6 +179,13 @@ export default function App() {
       </>
     );
   }
+
+  const headerOptions = {
+    headerShown: true,
+    headerStyle: { backgroundColor: PRIMARY },
+    headerTintColor: '#fff',
+    headerTitleStyle: { fontWeight: 'bold' },
+  };
 
   return (
     <>
@@ -176,95 +203,29 @@ export default function App() {
               />
             )}
           </Stack.Screen>
-          <Stack.Screen
-            name="AddProduct"
-            options={{
-              headerShown: true,
-              title: 'Tambah Produk',
-              headerStyle: { backgroundColor: '#6C63FF' },
-              headerTintColor: '#fff',
-              headerTitleStyle: { fontWeight: 'bold' },
-            }}
-          >
+          <Stack.Screen name="AddProduct" options={{ ...headerOptions, title: 'Tambah Produk' }}>
             {(props) => (
-              <AddProductScreen
-                {...props}
-                products={products}
-                setProducts={setProducts}
-              />
+              <AddProductScreen {...props} products={products} setProducts={setProducts} />
             )}
           </Stack.Screen>
-          <Stack.Screen
-            name="EditProduct"
-            options={{
-              headerShown: true,
-              title: 'Edit Produk',
-              headerStyle: { backgroundColor: '#6C63FF' },
-              headerTintColor: '#fff',
-              headerTitleStyle: { fontWeight: 'bold' },
-            }}
-          >
+          <Stack.Screen name="EditProduct" options={{ ...headerOptions, title: 'Edit Produk' }}>
             {(props) => (
-              <AddProductScreen
-                {...props}
-                products={products}
-                setProducts={setProducts}
-                isEdit={true}
-              />
+              <AddProductScreen {...props} products={products} setProducts={setProducts} isEdit={true} />
             )}
           </Stack.Screen>
-          <Stack.Screen
-            name="ProductDetail"
-            options={{
-              headerShown: true,
-              title: 'Detail Produk',
-              headerStyle: { backgroundColor: '#6C63FF' },
-              headerTintColor: '#fff',
-              headerTitleStyle: { fontWeight: 'bold' },
-            }}
-          >
+          <Stack.Screen name="ProductDetail" options={{ ...headerOptions, title: 'Detail Produk' }}>
             {(props) => (
-              <ProductDetailScreen
-                {...props}
-                products={products}
-                setProducts={setProducts}
-              />
+              <ProductDetailScreen {...props} products={products} setProducts={setProducts} />
             )}
           </Stack.Screen>
-          <Stack.Screen
-            name="TransactionHistory"
-            options={{
-              headerShown: true,
-              title: 'Riwayat Transaksi',
-              headerStyle: { backgroundColor: '#6C63FF' },
-              headerTintColor: '#fff',
-              headerTitleStyle: { fontWeight: 'bold' },
-            }}
-          >
+          <Stack.Screen name="TransactionHistory" options={{ ...headerOptions, title: 'Riwayat Transaksi' }}>
             {(props) => (
-              <TransactionHistoryScreen
-                {...props}
-                transactions={transactions}
-                products={products}
-              />
+              <TransactionHistoryScreen {...props} transactions={transactions} products={products} />
             )}
           </Stack.Screen>
-          <Stack.Screen
-            name="EditProfile"
-            options={{
-              headerShown: true,
-              title: 'Edit Profil',
-              headerStyle: { backgroundColor: '#6C63FF' },
-              headerTintColor: '#fff',
-              headerTitleStyle: { fontWeight: 'bold' },
-            }}
-          >
+          <Stack.Screen name="EditProfile" options={{ ...headerOptions, title: 'Edit Profil' }}>
             {(props) => (
-              <EditProfileScreen
-                {...props}
-                profile={profile}
-                setProfile={setProfile}
-              />
+              <EditProfileScreen {...props} profile={profile} setProfile={setProfile} />
             )}
           </Stack.Screen>
         </Stack.Navigator>

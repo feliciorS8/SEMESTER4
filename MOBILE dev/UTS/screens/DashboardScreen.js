@@ -68,20 +68,20 @@ export default function DashboardScreen({ navigation, products, transactions, pr
             <Text style={styles.storeName}>{profile.storeName}</Text>
           </View>
           <TouchableOpacity style={styles.historyBtn} onPress={() => navigation.navigate('TransactionHistory')}>
-            <Ionicons name="time-outline" size={22} color="#6C63FF" />
+            <Ionicons name="time-outline" size={22} color="#1E88E5" />
           </TouchableOpacity>
         </View>
       </View>
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 30 }}>
         <View style={styles.statsGrid}>
-          <StatCard icon="cube" iconColor="#6C63FF" bgColor="rgba(108,99,255,0.1)" label="Total Produk" value={totalProducts} />
+          <StatCard icon="cube" iconColor="#1E88E5" bgColor="rgba(30,136,229,0.1)" label="Total Produk" value={totalProducts} />
           <StatCard icon="receipt" iconColor="#00CED1" bgColor="rgba(0,206,209,0.1)" label="Transaksi" value={totalTransactions} />
           <StatCard icon="cash" iconColor="#4CAF50" bgColor="rgba(76,175,80,0.1)" label="Pendapatan" value={`Rp ${totalRevenue.toLocaleString('id-ID')}`} />
           <StatCard icon="trending-up" iconColor="#FF6B6B" bgColor="rgba(255,107,107,0.1)" label="Item Terjual" value={totalItemsSold} />
         </View>
         <Text style={styles.sectionTitle}>Aksi Cepat</Text>
         <View style={styles.quickActions}>
-          <QuickAction icon="add-circle" label="Tambah Produk" color="#6C63FF" onPress={() => navigation.navigate('AddProduct')} />
+          <QuickAction icon="add-circle" label="Tambah Produk" color="#1E88E5" onPress={() => navigation.navigate('AddProduct')} />
           <QuickAction icon="cart" label="Buat Transaksi" color="#00CED1" onPress={() => navigation.navigate('Transaksi')} />
           <QuickAction icon="list" label="Riwayat" color="#FF6B6B" onPress={() => navigation.navigate('TransactionHistory')} />
           <QuickAction icon="person" label="Profil" color="#4CAF50" onPress={() => navigation.navigate('Profil')} />
@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
   headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   greeting: { fontSize: 14, color: '#8E8E93', fontWeight: '500' },
   storeName: { fontSize: 22, fontWeight: '800', color: '#1a1a2e', marginTop: 4 },
-  historyBtn: { width: 44, height: 44, borderRadius: 14, backgroundColor: 'rgba(108,99,255,0.08)', justifyContent: 'center', alignItems: 'center' },
+  historyBtn: { width: 44, height: 44, borderRadius: 14, backgroundColor: 'rgba(30,136,229,0.08)', justifyContent: 'center', alignItems: 'center' },
   content: { flex: 1, paddingHorizontal: 20, paddingTop: 20 },
   statsGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
   statCard: { width: (width - 52) / 2, backgroundColor: '#FFF', borderRadius: 16, padding: 16, marginBottom: 12, flexDirection: 'row', alignItems: 'center', borderLeftWidth: 3, elevation: 2 },
@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
   statLabel: { fontSize: 11, color: '#8E8E93', marginTop: 2, fontWeight: '500' },
   sectionTitle: { fontSize: 18, fontWeight: '700', color: '#1a1a2e', marginTop: 24, marginBottom: 14 },
   sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  seeAll: { fontSize: 13, color: '#6C63FF', fontWeight: '600', marginTop: 24 },
+  seeAll: { fontSize: 13, color: '#1E88E5', fontWeight: '600', marginTop: 24 },
   quickActions: { flexDirection: 'row', justifyContent: 'space-between' },
   quickAction: { alignItems: 'center', width: (width - 60) / 4 },
   quickActionIcon: { width: 56, height: 56, borderRadius: 18, justifyContent: 'center', alignItems: 'center', marginBottom: 8 },
@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
   recentList: { backgroundColor: '#FFF', borderRadius: 16, overflow: 'hidden', marginTop: 4 },
   recentItem: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: '#F2F2F7' },
   recentLeft: { flexDirection: 'row', alignItems: 'center', flex: 1 },
-  recentDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#6C63FF', marginRight: 12 },
+  recentDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#1E88E5', marginRight: 12 },
   recentName: { fontSize: 14, fontWeight: '600', color: '#1a1a2e' },
   recentDate: { fontSize: 11, color: '#8E8E93', marginTop: 2 },
   recentRight: { alignItems: 'flex-end' },

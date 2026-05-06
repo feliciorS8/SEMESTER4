@@ -7,7 +7,7 @@ function InfoRow({ icon, label, value }) {
   return (
     <View style={styles.infoRow}>
       <View style={styles.infoLeft}>
-        <Ionicons name={icon} size={18} color="#6C63FF" />
+        <Ionicons name={icon} size={18} color="#1E88E5" />
         <Text style={styles.infoLabel}>{label}</Text>
       </View>
       <Text style={styles.infoValue}>{value}</Text>
@@ -92,11 +92,11 @@ const styles = StyleSheet.create({
   emptyText: { fontSize: 16, fontWeight: '600', color: '#8E8E93', marginTop: 12 },
   emojiHeader: { backgroundColor: '#FFF', alignItems: 'center', paddingVertical: 30, borderBottomLeftRadius: 24, borderBottomRightRadius: 24, elevation: 3 },
   productImage: { width: 160, height: 160, borderRadius: 20, backgroundColor: '#F2F2F7' },
-  categoryTag: { backgroundColor: 'rgba(108,99,255,0.1)', paddingHorizontal: 16, paddingVertical: 6, borderRadius: 20, marginTop: 12 },
-  categoryTagText: { fontSize: 12, fontWeight: '700', color: '#6C63FF' },
+  categoryTag: { backgroundColor: 'rgba(30,136,229,0.1)', paddingHorizontal: 16, paddingVertical: 6, borderRadius: 20, marginTop: 12 },
+  categoryTagText: { fontSize: 12, fontWeight: '700', color: '#1E88E5' },
   nameSection: { paddingHorizontal: 20, paddingTop: 20 },
   productName: { fontSize: 24, fontWeight: '800', color: '#1a1a2e' },
-  productPrice: { fontSize: 22, fontWeight: '800', color: '#6C63FF', marginTop: 6 },
+  productPrice: { fontSize: 22, fontWeight: '800', color: '#1E88E5', marginTop: 6 },
   infoCard: { backgroundColor: '#FFF', marginHorizontal: 20, marginTop: 20, borderRadius: 16, padding: 16, elevation: 2 },
   infoRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#F2F2F7' },
   infoLeft: { flexDirection: 'row', alignItems: 'center' },
@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
   descTitle: { fontSize: 15, fontWeight: '700', color: '#1a1a2e', marginBottom: 8 },
   descText: { fontSize: 14, color: '#636366', lineHeight: 22 },
   actions: { flexDirection: 'row', paddingHorizontal: 20, marginTop: 24, gap: 12 },
-  editBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#6C63FF', borderRadius: 16, height: 54, elevation: 4 },
+  editBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#1E88E5', borderRadius: 16, height: 54, elevation: 4 },
   editBtnText: { fontSize: 15, fontWeight: '700', color: '#FFF', marginLeft: 8 },
   deleteBtn: { width: 54, height: 54, borderRadius: 16, backgroundColor: 'rgba(255,107,107,0.1)', justifyContent: 'center', alignItems: 'center', borderWidth: 1.5, borderColor: 'rgba(255,107,107,0.3)' },
 });

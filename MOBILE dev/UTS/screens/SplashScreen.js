@@ -101,7 +101,7 @@ export default function SplashScreen({ onFinish }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1a1a2e',
+    backgroundColor: '#0D1B2A',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -110,7 +110,7 @@ const styles = StyleSheet.create({
     width: 300,
     height: 300,
     borderRadius: 150,
-    backgroundColor: 'rgba(108, 99, 255, 0.15)',
+    backgroundColor: 'rgba(30, 136, 229, 0.15)',
     top: -50,
     right: -80,
   },
@@ -139,12 +139,12 @@ const styles = StyleSheet.create({
     width: 110,
     height: 110,
     borderRadius: 30,
-    backgroundColor: 'rgba(108, 99, 255, 0.2)',
+    backgroundColor: 'rgba(30, 136, 229, 0.2)',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 24,
     borderWidth: 2,
-    borderColor: 'rgba(108, 99, 255, 0.4)',
+    borderColor: 'rgba(30, 136, 229, 0.4)',
   },
   iconText: {
     fontSize: 56,
@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 16,
-    color: '#6C63FF',
+    color: '#1E88E5',
     fontWeight: '600',
     marginTop: 8,
     letterSpacing: 2,
@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
   },
   progressBar: {
     height: '100%',
-    backgroundColor: '#6C63FF',
+    backgroundColor: '#1E88E5',
     borderRadius: 2,
   },
   loadingText: {
