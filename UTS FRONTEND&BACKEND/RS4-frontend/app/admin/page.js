@@ -13,6 +13,9 @@ export default function AdminConsole() {
   const [polis, setPolis] = useState([]);
   const [dokters, setDokters] = useState([]);
   const [reservasis, setReservasis] = useState([]);
+  const [laporanDokter, setLaporanDokter] = useState([]);
+  const [rekapPasien, setRekapPasien] = useState([]);
+  const [filterTanggal, setFilterTanggal] = useState({ from: "", to: "" });
   
   // Pagination state
   const [poliPage, setPoliPage] = useState(1);
@@ -38,7 +41,7 @@ export default function AdminConsole() {
     setLoading(true);
     try {
       if (activeTab === "dashboard") {
-        const res = await fetch("http://localhost:5000/api/admin/dashboard", { headers: { "Authorization": `Bearer ${token}` } });
+        const res = await fetch("/api/admin/dashboard", { headers: { "Authorization": `Bearer ${token}` } });
         if (!res.ok) throw new Error("Unauthorized");
         const data = await res.json();
         // Transform data for recharts
@@ -49,24 +52,36 @@ export default function AdminConsole() {
         })).reverse(); // reverse so oldest is first
         setStats({ ...data, chartData });
       } else if (activeTab === "poli") {
-        const res = await fetch(`http://localhost:5000/api/admin/poli?page=${poliPage}&limit=5`, { headers: { "Authorization": `Bearer ${token}` } });
+        const res = await fetch(`/api/admin/poli?page=${poliPage}&limit=5`, { headers: { "Authorization": `Bearer ${token}` } });
         const result = await res.json();
         setPolis(result.data);
         setPoliPagination(result.pagination);
       } else if (activeTab === "dokter") {
-        const res = await fetch(`http://localhost:5000/api/admin/dokter?page=${dokterPage}&limit=5`, { headers: { "Authorization": `Bearer ${token}` } });
+        const res = await fetch(`/api/admin/dokter?page=${dokterPage}&limit=5`, { headers: { "Authorization": `Bearer ${token}` } });
         const result = await res.json();
         setDokters(result.data);
         setDokterPagination(result.pagination);
         // Fetch ALL polis for the dropdown (no pagination)
-        const resPoli = await fetch(`http://localhost:5000/api/admin/poli?page=1&limit=100`, { headers: { "Authorization": `Bearer ${token}` } });
+        const resPoli = await fetch(`/api/admin/poli?page=1&limit=100`, { headers: { "Authorization": `Bearer ${token}` } });
         const poliResult = await resPoli.json();
         setAllPolis(poliResult.data);
       } else if (activeTab === "reservasi") {
-        const res = await fetch(`http://localhost:5000/api/admin/reservasi?page=${reservasiPage}&limit=5`, { headers: { "Authorization": `Bearer ${token}` } });
+        const res = await fetch(`/api/admin/reservasi?page=${reservasiPage}&limit=5`, { headers: { "Authorization": `Bearer ${token}` } });
         const result = await res.json();
         setReservasis(result.data);
         setReservasiPagination(result.pagination);
+      } else if (activeTab === "laporan") {
+        const rangeQuery = new URLSearchParams(filterTanggal).toString();
+        const res = await fetch(`/api/admin/laporan-dokter?${rangeQuery}`, { headers: { "Authorization": `Bearer ${token}` } });
+        if (!res.ok) throw new Error("Unauthorized");
+        const result = await res.json();
+        setLaporanDokter(result.data || []);
+      } else if (activeTab === "rekap") {
+        const rangeQuery = new URLSearchParams(filterTanggal).toString();
+        const res = await fetch(`/api/admin/rekap-pasien?${rangeQuery}`, { headers: { "Authorization": `Bearer ${token}` } });
+        if (!res.ok) throw new Error("Unauthorized");
+        const result = await res.json();
+        setRekapPasien(result.data || []);
       }
     } catch (err) {
       if(err.message === "Unauthorized") {
@@ -75,12 +90,12 @@ export default function AdminConsole() {
       }
     }
     setLoading(false);
-  }, [token, activeTab, poliPage, dokterPage, reservasiPage, router]);
+  }, [token, activeTab, poliPage, dokterPage, reservasiPage, filterTanggal, router]);
 
   useEffect(() => {
     if (!token) return;
     fetchData();
-  }, [token, activeTab, poliPage, dokterPage, reservasiPage, fetchData]);
+  }, [token, activeTab, poliPage, dokterPage, reservasiPage, filterTanggal, fetchData]);
 
   const logout = () => {
     localStorage.removeItem("token");
@@ -92,7 +107,7 @@ export default function AdminConsole() {
   const [poliForm, setPoliForm] = useState({ id: null, nama_poli: "", deskripsi: "" });
   const handlePoliSubmit = async (e) => {
     e.preventDefault();
-    const url = poliForm.id ? `http://localhost:5000/api/admin/poli/${poliForm.id}` : `http://localhost:5000/api/admin/poli`;
+    const url = poliForm.id ? `/api/admin/poli/${poliForm.id}` : `/api/admin/poli`;
     await fetch(url, {
       method: poliForm.id ? "PUT" : "POST",
       headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
@@ -104,15 +119,15 @@ export default function AdminConsole() {
 
   const handleDeletePoli = async (id) => {
     if(!confirm("Yakin hapus poli ini?")) return;
-    await fetch(`http://localhost:5000/api/admin/poli/${id}`, { method: "DELETE", headers: { "Authorization": `Bearer ${token}` } });
+    await fetch(`/api/admin/poli/${id}`, { method: "DELETE", headers: { "Authorization": `Bearer ${token}` } });
     fetchData();
   };
 
   // DOKTER HANDLERS
-  const [dokterForm, setDokterForm] = useState({ id: null, nama_dokter: "", spesialisasi: "", poli_id: "", jadwal_hari: "", jadwal_jam: "", no_wa: "", harga_beli: 0, harga_jual: 0, fotoFile: null });
+  const [dokterForm, setDokterForm] = useState({ id: null, nama_dokter: "", spesialisasi: "", poli_id: "", jadwal_hari: "", jadwal_jam: "", no_wa: "", harga_beli: 0, harga_jual: 0, username: "", password: "", fotoFile: null });
   const handleDokterSubmit = async (e) => {
     e.preventDefault();
-    const url = dokterForm.id ? `http://localhost:5000/api/admin/dokter/${dokterForm.id}` : `http://localhost:5000/api/admin/dokter`;
+    const url = dokterForm.id ? `/api/admin/dokter/${dokterForm.id}` : `/api/admin/dokter`;
     const fd = new FormData();
     for (const key in dokterForm) {
       if(key === 'fotoFile') {
@@ -122,30 +137,162 @@ export default function AdminConsole() {
       }
     }
     await fetch(url, { method: dokterForm.id ? "PUT" : "POST", headers: { "Authorization": `Bearer ${token}` }, body: fd });
-    setDokterForm({ id: null, nama_dokter: "", spesialisasi: "", poli_id: "", jadwal_hari: "", jadwal_jam: "", no_wa: "", harga_beli: 0, harga_jual: 0, fotoFile: null });
+    setDokterForm({ id: null, nama_dokter: "", spesialisasi: "", poli_id: "", jadwal_hari: "", jadwal_jam: "", no_wa: "", harga_beli: 0, harga_jual: 0, username: "", password: "", fotoFile: null });
     fetchData();
   };
 
   const handleDeleteDokter = async (id) => {
     if(!confirm("Yakin hapus dokter ini?")) return;
-    await fetch(`http://localhost:5000/api/admin/dokter/${id}`, { method: "DELETE", headers: { "Authorization": `Bearer ${token}` } });
+    await fetch(`/api/admin/dokter/${id}`, { method: "DELETE", headers: { "Authorization": `Bearer ${token}` } });
     fetchData();
   };
 
   // RESERVASI HANDLERS
-  const updateStatusReservasi = async (id, status) => {
-    await fetch(`http://localhost:5000/api/admin/reservasi/${id}/status`, {
+  const updateStatusReservasi = async (id, status, diagnosa = "") => {
+    await fetch(`/api/admin/reservasi/${id}/status`, {
       method: "PUT",
       headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
-      body: JSON.stringify({ status })
+      body: JSON.stringify({ status, diagnosa })
     });
     fetchData();
+  };
+
+  const updateDiagnosaReservasi = (id, diagnosa) => {
+    setReservasis(prev => prev.map(item => item.id === id ? { ...item, diagnosa } : item));
   };
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
     setIsMobileMenuOpen(false);
   }
+
+  const exportLaporanDokterExcel = () => {
+    const rows = laporanDokter.map((row, index) => `
+      <tr>
+        <td>${index + 1}</td>
+        <td>${row.nama_dokter || ""}</td>
+        <td>${row.spesialisasi || ""}</td>
+        <td>${row.nama_poli || ""}</td>
+        <td>${row.total_pasien || 0}</td>
+        <td>${row.total_pendapatan || 0}</td>
+        <td>${row.pendapatan_dokter || 0}</td>
+        <td>${row.pendapatan_rs || 0}</td>
+      </tr>
+    `).join("");
+
+    const html = `
+      <html>
+        <head><meta charset="UTF-8" /></head>
+        <body>
+          <table border="1">
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>Nama Dokter</th>
+                <th>Spesialisasi</th>
+                <th>Poli</th>
+                <th>Total Pasien</th>
+                <th>Total Pendapatan</th>
+                <th>Pendapatan Dokter</th>
+                <th>Pendapatan Rumah Sakit</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </body>
+      </html>
+    `;
+
+    const blob = new Blob([html], { type: "application/vnd.ms-excel;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `laporan-pendapatan-dokter-${new Date().toISOString().slice(0, 10)}.xls`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const statusLabel = (status) => {
+    if (status === "confirmed") return "Periksa";
+    if (status === "cancelled") return "Selesai";
+    return "Registrasi";
+  };
+
+  const rekapSummary = {
+    total: rekapPasien.length,
+    registrasi: rekapPasien.filter(row => row.status === "pending").length,
+    periksa: rekapPasien.filter(row => row.status === "confirmed").length,
+    selesai: rekapPasien.filter(row => row.status === "cancelled").length,
+    hangus: rekapPasien.filter(row => row.status === "pending" && row.tanggal_reservasi && new Date(row.tanggal_reservasi) < new Date(new Date().toDateString())).length
+  };
+
+  const DateRangeFilter = () => (
+    <div className="bg-white rounded-xl shadow p-4 mb-5 grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-3 items-end">
+      <div>
+        <label className="block text-xs font-semibold text-gray-600 mb-1">Dari tanggal</label>
+        <input type="date" value={filterTanggal.from} onChange={e=>setFilterTanggal({...filterTanggal, from: e.target.value})} className="w-full border rounded-lg px-3 py-2 text-sm" />
+      </div>
+      <div>
+        <label className="block text-xs font-semibold text-gray-600 mb-1">Sampai tanggal</label>
+        <input type="date" value={filterTanggal.to} onChange={e=>setFilterTanggal({...filterTanggal, to: e.target.value})} className="w-full border rounded-lg px-3 py-2 text-sm" />
+      </div>
+      <button type="button" onClick={()=>setFilterTanggal({ from: "", to: "" })} className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-200">
+        Reset
+      </button>
+    </div>
+  );
+
+  const exportRekapPasienExcel = () => {
+    const rows = rekapPasien.map((row, index) => `
+      <tr>
+        <td>${index + 1}</td>
+        <td>${row.nama_pasien || ""}</td>
+        <td>${row.no_wa || ""}</td>
+        <td>${row.tanggal_reservasi ? new Date(row.tanggal_reservasi).toLocaleDateString("id-ID") : ""}</td>
+        <td>${row.nama_poli || ""}</td>
+        <td>${row.nama_dokter || ""}</td>
+        <td>${statusLabel(row.status)}</td>
+        <td>${row.keluhan || ""}</td>
+        <td>${row.diagnosa || ""}</td>
+        <td>${row.harga_jual || 0}</td>
+        <td>${row.harga_beli || 0}</td>
+      </tr>
+    `).join("");
+
+    const html = `
+      <html>
+        <head><meta charset="UTF-8" /></head>
+        <body>
+          <table border="1">
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>Nama Pasien</th>
+                <th>No WA</th>
+                <th>Tanggal</th>
+                <th>Poli</th>
+                <th>Dokter Pemeriksa</th>
+                <th>Status</th>
+                <th>Keluhan</th>
+                <th>Diagnosa</th>
+                <th>Total Bayar Pasien</th>
+                <th>Jatah Dokter</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </body>
+      </html>
+    `;
+
+    const blob = new Blob([html], { type: "application/vnd.ms-excel;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `rekap-history-pasien-${new Date().toISOString().slice(0, 10)}.xls`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
 
   // Reusable Pagination Component
   const PaginationControls = ({ pagination, currentPage, setPage }) => {
@@ -209,6 +356,8 @@ export default function AdminConsole() {
           <button onClick={() => handleTabChange("poli")} className={`text-left px-4 py-3 rounded-lg font-medium transition-colors ${activeTab==="poli" ? "bg-cyan-100 text-cyan-700" : "hover:bg-gray-100 text-gray-600"}`}>🏷️ Kelola Poli</button>
           <button onClick={() => handleTabChange("dokter")} className={`text-left px-4 py-3 rounded-lg font-medium transition-colors ${activeTab==="dokter" ? "bg-cyan-100 text-cyan-700" : "hover:bg-gray-100 text-gray-600"}`}>👨‍⚕️ Kelola Dokter</button>
           <button onClick={() => handleTabChange("reservasi")} className={`text-left px-4 py-3 rounded-lg font-medium transition-colors ${activeTab==="reservasi" ? "bg-cyan-100 text-cyan-700" : "hover:bg-gray-100 text-gray-600"}`}>📝 Registrasi/Reservasi</button>
+          <button onClick={() => handleTabChange("rekap")} className={`text-left px-4 py-3 rounded-lg font-medium transition-colors ${activeTab==="rekap" ? "bg-cyan-100 text-cyan-700" : "hover:bg-gray-100 text-gray-600"}`}>Rekap Pasien</button>
+          <button onClick={() => handleTabChange("laporan")} className={`text-left px-4 py-3 rounded-lg font-medium transition-colors ${activeTab==="laporan" ? "bg-cyan-100 text-cyan-700" : "hover:bg-gray-100 text-gray-600"}`}>Laporan Dokter</button>
           <button onClick={logout} className="text-left px-4 py-3 rounded-lg font-medium text-red-600 hover:bg-red-50 mt-4 border border-transparent hover:border-red-200">🚪 Logout</button>
         </div>
       </div>
@@ -387,13 +536,21 @@ export default function AdminConsole() {
                   <label className="text-xs font-semibold text-gray-600">Jatah Dokter / Harga Beli (Tanpa Titik)</label>
                   <input type="number" value={dokterForm.harga_beli} onChange={e=>setDokterForm({...dokterForm, harga_beli: Number(e.target.value)})} placeholder="Contoh: 70000" className="w-full border rounded p-2 text-sm border-red-200" required />
                 </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-gray-600">Username Login Dokter</label>
+                  <input type="text" value={dokterForm.username || ""} onChange={e=>setDokterForm({...dokterForm, username: e.target.value})} placeholder="Contoh: dokterjenny" className="w-full border rounded p-2 text-sm" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-gray-600">Password Dokter</label>
+                  <input type="password" value={dokterForm.password || ""} onChange={e=>setDokterForm({...dokterForm, password: e.target.value})} placeholder={dokterForm.id ? "Kosongkan jika tidak diubah" : "Default: dokter123"} className="w-full border rounded p-2 text-sm" />
+                </div>
                 <div className="md:col-span-2 space-y-1">
                   <label className="text-xs font-semibold text-gray-600">Upload Foto Profil Dokter</label>
                   <input type="file" accept="image/*" onChange={e=>setDokterForm({...dokterForm, fotoFile: e.target.files[0]})} className="w-full border rounded p-2 text-sm bg-gray-50 file:mr-4 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-cyan-50 file:text-cyan-700 hover:file:bg-cyan-100" />
                 </div>
                 <div className="md:col-span-2 pt-2 flex gap-2">
                   <button type="submit" className="bg-cyan-600 text-white px-4 py-2 rounded text-sm font-medium hover:bg-cyan-700">{dokterForm.id ? "Simpan Perubahan" : "Simpan Dokter"}</button>
-                  {dokterForm.id && <button type="button" onClick={()=>setDokterForm({id:null, nama_dokter:"", spesialisasi:"", poli_id:"", jadwal_hari:"", jadwal_jam:"", no_wa:"", harga_beli:0, harga_jual:0, fotoFile:null})} className="bg-gray-200 text-gray-800 px-4 py-2 rounded text-sm hover:bg-gray-300">Batal</button>}
+                  {dokterForm.id && <button type="button" onClick={()=>setDokterForm({id:null, nama_dokter:"", spesialisasi:"", poli_id:"", jadwal_hari:"", jadwal_jam:"", no_wa:"", harga_beli:0, harga_jual:0, username:"", password:"", fotoFile:null})} className="bg-gray-200 text-gray-800 px-4 py-2 rounded text-sm hover:bg-gray-300">Batal</button>}
                 </div>
               </form>
             </div>
@@ -416,6 +573,7 @@ export default function AdminConsole() {
                          <div>
                             <p className="font-bold text-gray-800">{d.nama_dokter}</p>
                             <p className="text-xs text-gray-500">{d.spesialisasi} • WA: {d.no_wa}</p>
+                            <p className="text-xs text-cyan-600">Login: {d.username || `dokter${d.id}`}</p>
                          </div>
                       </td>
                       <td className="px-4 py-3 text-sm">{d.nama_poli}<br/><span className="text-gray-400">{d.jadwal_hari} {d.jadwal_jam}</span></td>
@@ -424,7 +582,7 @@ export default function AdminConsole() {
                         <span className="text-red-500 text-xs">Beli: Rp{d.harga_beli?.toLocaleString('id-ID')}</span>
                       </td>
                       <td className="px-4 py-3 flex gap-2">
-                        <button onClick={()=>setDokterForm({...d, fotoFile: null})} className="text-xs bg-gray-100 hover:bg-gray-200 px-2 py-1 rounded">Edit</button>
+                        <button onClick={()=>setDokterForm({...d, password: "", fotoFile: null})} className="text-xs bg-gray-100 hover:bg-gray-200 px-2 py-1 rounded">Edit</button>
                         <button onClick={()=>handleDeleteDokter(d.id)} className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded">Hapus</button>
                       </td>
                     </tr>
@@ -446,6 +604,8 @@ export default function AdminConsole() {
                     <th className="px-4 py-3 font-semibold text-gray-600 text-sm">Pasien / Kontak</th>
                     <th className="px-4 py-3 font-semibold text-gray-600 text-sm">Target Poli & Dokter</th>
                     <th className="px-4 py-3 font-semibold text-gray-600 text-sm">Tanggal Rencana</th>
+                    <th className="px-4 py-3 font-semibold text-gray-600 text-sm">Diagnosa</th>
+                    <th className="px-4 py-3 font-semibold text-gray-600 text-sm text-right">Total Bayar</th>
                     <th className="px-4 py-3 font-semibold text-gray-600 text-sm">Status</th>
                   </tr>
                 </thead>
@@ -463,25 +623,186 @@ export default function AdminConsole() {
                       <td className="px-4 py-3 text-sm">
                         {r.tanggal_reservasi ? new Date(r.tanggal_reservasi).toLocaleDateString('id-ID') : '-'}
                       </td>
+                      <td className="px-4 py-3 text-sm min-w-64">
+                        <textarea
+                          value={r.diagnosa || ""}
+                          onChange={(e)=>updateDiagnosaReservasi(r.id, e.target.value)}
+                          rows="2"
+                          placeholder="Isi hasil diagnosa"
+                          className="w-full border rounded p-2 text-xs outline-none focus:border-cyan-500 resize-none"
+                        />
+                      </td>
+                      <td className="px-4 py-3 text-sm text-right">
+                        <p className="font-semibold text-gray-800">Rp {parseInt(r.harga_jual || 0).toLocaleString('id-ID')}</p>
+                        <p className="text-xs text-gray-500">Dokter: Rp {parseInt(r.harga_beli || 0).toLocaleString('id-ID')}</p>
+                      </td>
                       <td className="px-4 py-3 text-sm">
                         <select 
                           value={r.status} 
-                          onChange={(e)=>updateStatusReservasi(r.id, e.target.value)}
-                          className={`text-xs px-2 py-1 rounded outline-none border ${r.status==='confirmed'?'bg-green-100 text-green-800 border-green-200':(r.status==='pending'?'bg-yellow-100 text-yellow-800 border-yellow-200':'bg-red-100 text-red-800 border-red-200')}`}
+                          onChange={(e)=>updateStatusReservasi(r.id, e.target.value, r.diagnosa)}
+                          className={`text-xs px-2 py-1 rounded outline-none border ${r.status==='confirmed'?'bg-green-100 text-green-800 border-green-200':(r.status==='pending'?'bg-yellow-100 text-yellow-800 border-yellow-200':'bg-blue-100 text-blue-800 border-blue-200')}`}
                         >
-                          <option value="pending">Pending</option>
-                          <option value="confirmed">Confirmed</option>
-                          <option value="cancelled">Diabaikan</option>
+                          <option value="pending">Registrasi</option>
+                          <option value="confirmed">Periksa</option>
+                          <option value="cancelled">Selesai</option>
                         </select>
+                        <button
+                          onClick={()=>updateStatusReservasi(r.id, r.status, r.diagnosa)}
+                          className="block mt-2 text-xs bg-cyan-600 text-white px-2 py-1 rounded hover:bg-cyan-700"
+                        >
+                          Simpan Diagnosa
+                        </button>
                       </td>
                     </tr>
                   ))}
                   {reservasis.length === 0 && (
-                     <tr><td colSpan="4" className="px-6 py-8 text-center text-gray-500">Tidak ada data reservasi</td></tr>
+                     <tr><td colSpan="6" className="px-6 py-8 text-center text-gray-500">Tidak ada data reservasi</td></tr>
                   )}
                 </tbody>
               </table>
               <PaginationControls pagination={reservasiPagination} currentPage={reservasiPage} setPage={setReservasiPage} />
+            </div>
+          </div>
+        )}
+
+        {activeTab === "rekap" && (
+          <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900">Rekap History Pasien</h1>
+                <p className="text-sm text-gray-500 mt-1">Data pasien, tanggal, dokter pemeriksa, diagnosa, status, dan pembayaran.</p>
+              </div>
+              <button
+                onClick={exportRekapPasienExcel}
+                disabled={rekapPasien.length === 0}
+                className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Download Excel
+              </button>
+            </div>
+
+            <DateRangeFilter />
+
+            <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-5">
+              <div className="bg-white rounded-xl shadow p-4 border-l-4 border-gray-500">
+                <p className="text-xs text-gray-500 font-medium">Total Pasien</p>
+                <p className="text-2xl font-bold text-gray-900">{rekapSummary.total}</p>
+              </div>
+              <div className="bg-white rounded-xl shadow p-4 border-l-4 border-yellow-500">
+                <p className="text-xs text-gray-500 font-medium">Registrasi</p>
+                <p className="text-2xl font-bold text-gray-900">{rekapSummary.registrasi}</p>
+              </div>
+              <div className="bg-white rounded-xl shadow p-4 border-l-4 border-green-500">
+                <p className="text-xs text-gray-500 font-medium">Periksa</p>
+                <p className="text-2xl font-bold text-gray-900">{rekapSummary.periksa}</p>
+              </div>
+              <div className="bg-white rounded-xl shadow p-4 border-l-4 border-blue-500">
+                <p className="text-xs text-gray-500 font-medium">Selesai</p>
+                <p className="text-2xl font-bold text-gray-900">{rekapSummary.selesai}</p>
+              </div>
+              <div className="bg-white rounded-xl shadow p-4 border-l-4 border-red-500">
+                <p className="text-xs text-gray-500 font-medium">Belum Datang/Hangus</p>
+                <p className="text-2xl font-bold text-gray-900">{rekapSummary.hangus}</p>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl shadow overflow-x-auto">
+              <table className="min-w-full text-left text-sm">
+                <thead className="bg-gray-50 border-b">
+                  <tr>
+                    <th className="px-4 py-3 font-semibold text-gray-600">Pasien</th>
+                    <th className="px-4 py-3 font-semibold text-gray-600">Tanggal</th>
+                    <th className="px-4 py-3 font-semibold text-gray-600">Dokter</th>
+                    <th className="px-4 py-3 font-semibold text-gray-600">Status</th>
+                    <th className="px-4 py-3 font-semibold text-gray-600">Diagnosa</th>
+                    <th className="px-4 py-3 font-semibold text-gray-600 text-right">Total Bayar</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {rekapPasien.map((row) => (
+                    <tr key={row.id} className="hover:bg-gray-50">
+                      <td className="px-4 py-4">
+                        <p className="font-bold text-gray-800">{row.nama_pasien}</p>
+                        <p className="text-xs text-gray-500">WA: {row.no_wa}</p>
+                      </td>
+                      <td className="px-4 py-4">{row.tanggal_reservasi ? new Date(row.tanggal_reservasi).toLocaleDateString("id-ID") : "-"}</td>
+                      <td className="px-4 py-4">
+                        <p className="font-medium">{row.nama_dokter || "-"}</p>
+                        <p className="text-xs text-gray-500">{row.nama_poli || "-"}</p>
+                      </td>
+                      <td className="px-4 py-4">
+                        <span className={`text-xs px-2 py-1 rounded border ${row.status==='confirmed'?'bg-green-100 text-green-800 border-green-200':(row.status==='pending'?'bg-yellow-100 text-yellow-800 border-yellow-200':'bg-blue-100 text-blue-800 border-blue-200')}`}>
+                          {statusLabel(row.status)}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4 max-w-xs">
+                        <p className="text-gray-700">{row.diagnosa || "-"}</p>
+                        <p className="text-xs text-gray-400 mt-1">Keluhan: {row.keluhan || "-"}</p>
+                      </td>
+                      <td className="px-4 py-4 text-right">
+                        <p className="font-semibold text-gray-800">Rp {parseInt(row.harga_jual || 0).toLocaleString("id-ID")}</p>
+                        <p className="text-xs text-gray-500">Jatah dokter: Rp {parseInt(row.harga_beli || 0).toLocaleString("id-ID")}</p>
+                      </td>
+                    </tr>
+                  ))}
+                  {rekapPasien.length === 0 && (
+                    <tr><td colSpan="6" className="px-6 py-8 text-center text-gray-500">Belum ada history pasien</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {activeTab === "laporan" && (
+          <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900">Laporan Pendapatan Dokter</h1>
+                <p className="text-sm text-gray-500 mt-1">Ringkasan pendapatan dari reservasi yang masuk untuk tiap dokter.</p>
+              </div>
+              <button
+                onClick={exportLaporanDokterExcel}
+                disabled={laporanDokter.length === 0}
+                className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Download Excel
+              </button>
+            </div>
+
+            <DateRangeFilter />
+
+            <div className="bg-white rounded-xl shadow overflow-x-auto">
+              <table className="min-w-full text-left text-sm">
+                <thead className="bg-gray-50 border-b">
+                  <tr>
+                    <th className="px-4 py-3 font-semibold text-gray-600">Dokter</th>
+                    <th className="px-4 py-3 font-semibold text-gray-600">Poli</th>
+                    <th className="px-4 py-3 font-semibold text-gray-600 text-center">Pasien</th>
+                    <th className="px-4 py-3 font-semibold text-gray-600 text-right">Total Pendapatan</th>
+                    <th className="px-4 py-3 font-semibold text-gray-600 text-right">Pendapatan Dokter</th>
+                    <th className="px-4 py-3 font-semibold text-gray-600 text-right">Pendapatan RS</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {laporanDokter.map((row) => (
+                    <tr key={row.id} className="hover:bg-gray-50">
+                      <td className="px-4 py-4">
+                        <p className="font-bold text-gray-800">{row.nama_dokter}</p>
+                        <p className="text-xs text-gray-500">{row.spesialisasi}</p>
+                      </td>
+                      <td className="px-4 py-4">{row.nama_poli || "-"}</td>
+                      <td className="px-4 py-4 text-center">{row.total_pasien}</td>
+                      <td className="px-4 py-4 text-right">Rp {parseInt(row.total_pendapatan || 0).toLocaleString("id-ID")}</td>
+                      <td className="px-4 py-4 text-right font-semibold text-red-500">Rp {parseInt(row.pendapatan_dokter || 0).toLocaleString("id-ID")}</td>
+                      <td className="px-4 py-4 text-right font-semibold text-cyan-600">Rp {parseInt(row.pendapatan_rs || 0).toLocaleString("id-ID")}</td>
+                    </tr>
+                  ))}
+                  {laporanDokter.length === 0 && (
+                    <tr><td colSpan="6" className="px-6 py-8 text-center text-gray-500">Belum ada data pendapatan dokter</td></tr>
+                  )}
+                </tbody>
+              </table>
             </div>
           </div>
         )}

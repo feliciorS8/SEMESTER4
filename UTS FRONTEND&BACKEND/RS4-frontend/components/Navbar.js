@@ -21,7 +21,10 @@ export default function Navbar() {
             </div>
           </div>
           <div className="hidden md:flex items-center">
-             <Link href="/login" className="bg-white text-cyan-600 hover:bg-cyan-50 px-4 py-2 rounded-md text-sm font-medium shadow transition">Login / Admin</Link>
+             <div className="flex gap-2">
+               <Link href="/dokter-login" className="bg-cyan-700 text-white border border-cyan-200 hover:bg-cyan-800 px-4 py-2 rounded-md text-sm font-medium shadow transition">Login Dokter</Link>
+               <Link href="/login" className="bg-white text-cyan-600 hover:bg-cyan-50 px-4 py-2 rounded-md text-sm font-medium shadow transition">Login Admin</Link>
+             </div>
           </div>
           <div className="flex items-center md:hidden">
             <button onClick={() => setIsOpen(!isOpen)} className="text-white hover:text-cyan-200 focus:outline-none">
@@ -40,7 +43,8 @@ export default function Navbar() {
           <Link href="/#poli" onClick={()=>setIsOpen(false)} className="block px-3 py-2 rounded-md font-medium hover:bg-cyan-600">Poli</Link>
           <Link href="/#dokter" onClick={()=>setIsOpen(false)} className="block px-3 py-2 rounded-md font-medium hover:bg-cyan-600">Dokter</Link>
           <Link href="/reservasi" onClick={()=>setIsOpen(false)} className="block px-3 py-2 rounded-md font-medium hover:bg-cyan-600">Reservasi</Link>
-          <Link href="/login" onClick={()=>setIsOpen(false)} className="block mt-4 text-center bg-white text-cyan-700 px-3 py-2 rounded-md font-medium shadow">Login / Admin</Link>
+          <Link href="/dokter-login" onClick={()=>setIsOpen(false)} className="block mt-4 text-center bg-cyan-800 text-white border border-cyan-200 px-3 py-2 rounded-md font-medium shadow">Login Dokter</Link>
+          <Link href="/login" onClick={()=>setIsOpen(false)} className="block text-center bg-white text-cyan-700 px-3 py-2 rounded-md font-medium shadow">Login Admin</Link>
         </div>
       )}
     </nav>

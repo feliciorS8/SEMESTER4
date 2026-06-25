@@ -1,0 +1,38 @@
+# Expo
+.expo/
+.expo-shared/
+dist/
+npm-debug.*
+
+# Dependencies
+node_modules/
+yarn.lock
+package-lock.json
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Build
+*.jks
+*.p8
+*.xcarchive
+build/
+
+# Logs
+logs/
+*.log
+npm-debug.log*

@@ -1,0 +1,28 @@
+{
+  "expo": {
+    "name": "UMKM Go Digital",
+    "slug": "umkm-go-digital",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "backgroundColor": "#1a1a2e"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.khadija.umkmgodigital"
+    },
+    "web": {},
+    "plugins": [
+      "expo-font",
+      "expo-sqlite"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "5400a12a-3d2f-4e9c-9595-286b1b2b6f71"
+      }
+    }
+  }
+}
